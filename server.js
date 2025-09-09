@@ -8,7 +8,7 @@ app.use(express.json());
 
 const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-// Небольшой health-check, чтобы в браузере видеть "OK"
+// Health-check
 app.get("/", (req, res) => res.send("OK"));
 
 const SYSTEM_PROMPT = `
@@ -106,7 +106,6 @@ app.post("/chat", async (req, res) => {
         { role: "user", content: `task=${task}\n${message}` }
       ],
       temperature: task === "consult" ? 0.5 : 0.25,
-      modalities: ["text"],
       text: {
         format: {
           type: "json_schema",
@@ -133,7 +132,6 @@ app.post("/chat", async (req, res) => {
   }
 });
 
-// Заглушка для дальнейшей интеграции (email/Google Sheet/CRM)
 app.post("/handoff", async (req, res) => {
   return res.json({ ok: true });
 });
