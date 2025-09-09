@@ -23,74 +23,21 @@ Rules:
 - Lead classification: one of {hot,warm,cold,spam,invalid}, score 0–100 with reasons and urgency.
 - Handoff: brief summary, key facts, objections (if any), priority P0/P1/P2, next step. Respect privacy.
 
+Output strictly valid JSON with these top-level fields:
+- task: "consult" | "classify" | "handoff"
+- language: "ru" | "uk" | "en" | "de" | "ar"
+- need_tools: boolean
+- consult?: { next_questions?: string[], advice?: string[], next_action?: string }
+- classify?: { segment: "hot"|"warm"|"cold"|"spam"|"invalid", lead_score: number, reasons?: string[], missing_fields?: string[], urgency?: "<2w"|"2-8w"|">8w"|"unknown", preferred_contact?: string }
+- handoff?: { brief_summary: string, key_facts?: string[], priority: "P0"|"P1"|"P2", next_step?: string, scheduled_call?: { datetime_iso?: string, channel?: string } }
+
+Do not include any extra fields. Return JSON only, no text outside JSON.
+
 Modes:
-- task="consult": ask missing questions, give short advice and next_action.
+- task="consult": ask missing questions, short advice, next_action.
 - task="classify": segment + score + reasons + missing_fields + urgency + preferred_contact (if known).
 - task="handoff": CRM-ready summary + suggested callback slot/channel.
-
-Few-shot style notes (do not output literally):
-- RU: "Ищу 2к в Хургаде, до 80,000 USD, ближайшие 1–2 месяца, рассрочка, связь — Telegram." → segment=hot, urgency=2-8w, missing_fields: район, метраж.
-- EN: "Budget 120k USD, El Kawther or Intercontinental, move in <2 months, WhatsApp." → hot, reasons: clear budget+area+timeline.
-- AR: keep concise MSA; confirm consent to be contacted and preferred time window (with timezone).
 `;
-
-const OUTPUT_SCHEMA = {
-  type: "object",
-  properties: {
-    task: { type: "string", enum: ["consult", "classify", "handoff"] },
-    language: { type: "string", enum: ["ru", "uk", "en", "de", "ar"] },
-    need_tools: { type: "boolean" },
-    consult: {
-      type: "object",
-      properties: {
-        next_questions: { type: "array", items: { type: "string" } },
-        advice: { type: "array", items: { type: "string" } },
-        next_action: { type: "string" }
-      }
-    },
-    classify: {
-      type: "object",
-      properties: {
-        segment: { type: "string", enum: ["hot", "warm", "cold", "spam", "invalid"] },
-        lead_score: { type: "integer", minimum: 0, maximum: 100 },
-        reasons: { type: "array", items: { type: "string" } },
-        missing_fields: { type: "array", items: { type: "string" } },
-        urgency: { type: "string", enum: ["<2w", "2-8w", ">8w", "unknown"] },
-        preferred_contact: { type: "string" }
-      },
-      required: ["segment", "lead_score"]
-    },
-    handoff: {
-      type: "object",
-      properties: {
-        brief_summary: { type: "string" },
-        key_facts: { type: "array", items: { type: "string" } },
-        priority: { type: "string", enum: ["P0", "P1", "P2"] },
-        next_step: { type: "string" },
-        scheduled_call: {
-          type: "object",
-          properties: {
-            datetime_iso: { type: "string" },
-            channel: { type: "string" }
-          }
-        }
-      },
-      required: ["brief_summary", "priority"]
-    },
-    tool_requests: {
-      type: "array",
-      items: {
-        type: "object",
-        properties: {
-          name: { type: "string" },
-          arguments: { type: "object" }
-        },
-        required: ["name", "arguments"]
-      }
-    }
-  },
-  required: ["task", "language", "need_tools"]
-};
 
 app.post("/chat", async (req, res) => {
   try {
@@ -99,31 +46,22 @@ app.post("/chat", async (req, res) => {
       return res.status(400).json({ error: "bad_request", details: "message is required" });
     }
 
-    const response = await client.responses.create({
+    const completion = await client.chat.completions.create({
       model: "gpt-4o-mini",
-      input: [
+      temperature: task === "consult" ? 0.5 : 0.25,
+      response_format: { type: "json_object" },
+      messages: [
         { role: "system", content: SYSTEM_PROMPT },
         { role: "user", content: `task=${task}\n${message}` }
-      ],
-      temperature: task === "consult" ? 0.5 : 0.25,
-      text: {
-        format: {
-          type: "json_schema",
-          json_schema: {
-            name: "HurghadaRE_V1",
-            schema: OUTPUT_SCHEMA,
-            strict: true
-          }
-        }
-      }
+      ]
     });
 
-    const outText = response.output_text;
+    const content = completion.choices?.[0]?.message?.content || "";
     let out;
     try {
-      out = JSON.parse(outText);
+      out = JSON.parse(content);
     } catch {
-      return res.status(502).json({ error: "invalid_model_output", raw: outText });
+      return res.status(502).json({ error: "invalid_model_output", raw: content });
     }
     return res.json(out);
   } catch (e) {
@@ -132,6 +70,7 @@ app.post("/chat", async (req, res) => {
   }
 });
 
+// Заглушка для интеграции (email/Sheet/CRM)
 app.post("/handoff", async (req, res) => {
   return res.json({ ok: true });
 });
