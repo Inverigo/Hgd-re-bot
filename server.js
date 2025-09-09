@@ -8,6 +8,9 @@ app.use(express.json());
 
 const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
+// Небольшой health-check, чтобы в браузере видеть "OK"
+app.get("/", (req, res) => res.send("OK"));
+
 const SYSTEM_PROMPT = `
 You are a multilingual real estate sales assistant for Hurghada, Egypt.
 Tasks: (1) consult; (2) classify lead; (3) handoff to manager.
@@ -35,7 +38,7 @@ const OUTPUT_SCHEMA = {
   type: "object",
   properties: {
     task: { type: "string", enum: ["consult", "classify", "handoff"] },
-    language: { type: "string", enum: ["ru","uk","en","de","ar"] },
+    language: { type: "string", enum: ["ru", "uk", "en", "de", "ar"] },
     need_tools: { type: "boolean" },
     consult: {
       type: "object",
@@ -48,21 +51,21 @@ const OUTPUT_SCHEMA = {
     classify: {
       type: "object",
       properties: {
-        segment: { type: "string", enum: ["hot","warm","cold","spam","invalid"] },
+        segment: { type: "string", enum: ["hot", "warm", "cold", "spam", "invalid"] },
         lead_score: { type: "integer", minimum: 0, maximum: 100 },
         reasons: { type: "array", items: { type: "string" } },
         missing_fields: { type: "array", items: { type: "string" } },
-        urgency: { type: "string", enum: ["<2w","2-8w",">8w","unknown"] },
+        urgency: { type: "string", enum: ["<2w", "2-8w", ">8w", "unknown"] },
         preferred_contact: { type: "string" }
       },
-      required: ["segment","lead_score"]
+      required: ["segment", "lead_score"]
     },
     handoff: {
       type: "object",
       properties: {
         brief_summary: { type: "string" },
         key_facts: { type: "array", items: { type: "string" } },
-        priority: { type: "string", enum: ["P0","P1","P2"] },
+        priority: { type: "string", enum: ["P0", "P1", "P2"] },
         next_step: { type: "string" },
         scheduled_call: {
           type: "object",
@@ -72,55 +75,70 @@ const OUTPUT_SCHEMA = {
           }
         }
       },
-      required: ["brief_summary","priority"]
+      required: ["brief_summary", "priority"]
     },
     tool_requests: {
       type: "array",
       items: {
         type: "object",
-        properties: { name: { type: "string" }, arguments: { type: "object" } },
-        required: ["name","arguments"]
+        properties: {
+          name: { type: "string" },
+          arguments: { type: "object" }
+        },
+        required: ["name", "arguments"]
       }
     }
   },
-  required: ["task","language","need_tools"]
+  required: ["task", "language", "need_tools"]
 };
 
 app.post("/chat", async (req, res) => {
   try {
-    const { message, task = "consult" } = req.body;
+    const { message, task = "consult" } = req.body || {};
+    if (typeof message !== "string" || !message.trim()) {
+      return res.status(400).json({ error: "bad_request", details: "message is required" });
+    }
 
     const response = await client.responses.create({
-  model: "gpt-4o-mini",
-  input: [
-    { role: "system", content: SYSTEM_PROMPT },
-    { role: "user", content: `task=${task}\n${message}` }
-  ],
-  temperature: task === "consult" ? 0.5 : 0.25,
-  modalities: ["text"],
-  text: {
-    format: {
-      type: "json_schema",
-      json_schema: {
-        name: "HurghadaRE_V1",
-        schema: OUTPUT_SCHEMA,
-        strict: true
+      model: "gpt-4o-mini",
+      input: [
+        { role: "system", content: SYSTEM_PROMPT },
+        { role: "user", content: `task=${task}\n${message}` }
+      ],
+      temperature: task === "consult" ? 0.5 : 0.25,
+      modalities: ["text"],
+      text: {
+        format: {
+          type: "json_schema",
+          json_schema: {
+            name: "HurghadaRE_V1",
+            schema: OUTPUT_SCHEMA,
+            strict: true
+          }
         }
       }
     });
 
-    const out = JSON.parse(response.output_text);
-    res.json(out);
+    const outText = response.output_text;
+    let out;
+    try {
+      out = JSON.parse(outText);
+    } catch {
+      return res.status(502).json({ error: "invalid_model_output", raw: outText });
+    }
+    return res.json(out);
   } catch (e) {
     console.error(e);
-    res.status(500).json({ error: "server_error", details: String(e) });
+    return res.status(500).json({ error: "server_error", details: String(e) });
   }
 });
 
-// Stub endpoint: add email/Sheet/CRM later
+// Заглушка для дальнейшей интеграции (email/Google Sheet/CRM)
 app.post("/handoff", async (req, res) => {
-  res.json({ ok: true });
+  return res.json({ ok: true });
 });
 
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => console.log(`API on http://localhost:${PORT}`));
+app.listen(PORT, () => {
+  console.log(`API on http://localhost:${PORT}`);
+});
