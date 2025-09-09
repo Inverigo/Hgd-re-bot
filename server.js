@@ -91,18 +91,20 @@ app.post("/chat", async (req, res) => {
     const { message, task = "consult" } = req.body;
 
     const response = await client.responses.create({
-      model: "gpt-4.1-mini",
-      input: [
-        { role: "system", content: SYSTEM_PROMPT },
-        { role: "user", content: `task=${task}\n${message}` }
-      ],
-      temperature: task === "consult" ? 0.5 : 0.25,
-      response_format: {
-        type: "json_schema",
-        json_schema: {
-          name: "HurghadaRE_V1",
-          schema: OUTPUT_SCHEMA,
-          strict: true
+  model: "gpt-4o-mini",
+  input: [
+    { role: "system", content: SYSTEM_PROMPT },
+    { role: "user", content: `task=${task}\n${message}` }
+  ],
+  temperature: task === "consult" ? 0.5 : 0.25,
+  modalities: ["text"],
+  text: {
+    format: {
+      type: "json_schema",
+      json_schema: {
+        name: "HurghadaRE_V1",
+        schema: OUTPUT_SCHEMA,
+        strict: true
         }
       }
     });
