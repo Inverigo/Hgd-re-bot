@@ -18,11 +18,11 @@ const leads = [];
 app.get("/", (req, res) => {
   res.send(`
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Консультант по недвижимости в Хургаде</title>
+    <title>Zizu - Real Estate Assistant in Hurghada</title>
     <style>
         body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #f5f5f5; }
         .chat-container { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
@@ -38,29 +38,58 @@ app.get("/", (req, res) => {
         .contact-form { background: #e8f5e8; padding: 15px; border-radius: 10px; margin: 10px 0; }
         .contact-form input { width: 100%; padding: 8px; margin: 5px 0; border: 1px solid #ddd; border-radius: 5px; }
         .contact-form button { background: #4caf50; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
+        .language-switch { text-align: center; margin-bottom: 15px; }
+        .language-switch button { background: #f0f0f0; border: 1px solid #ddd; padding: 5px 10px; margin: 0 5px; border-radius: 5px; cursor: pointer; }
+        .language-switch button.active { background: #007cba; color: white; }
     </style>
 </head>
 <body>
     <div class="chat-container">
         <div class="header">
-            <h2>🏠 Консультант по недвижимости в Хургаде</h2>
-            <p>Получите персональную консультацию и подберите идеальную недвижимость!</p>
+            <h2>🏠 Zizu - Real Estate Assistant</h2>
+            <p>Your personal guide for buying and renting property in Hurghada, Egypt</p>
+        </div>
+        
+        <div class="language-switch">
+            <button onclick="switchLanguage('en')" class="active" id="btn-en">English</button>
+            <button onclick="switchLanguage('ru')" id="btn-ru">Русский</button>
+            <button onclick="switchLanguage('ar')" id="btn-ar">العربية</button>
         </div>
         
         <div id="messages" class="messages">
             <div class="message bot-message">
-                <strong>🤖 Консультант:</strong> Привет! Я помогу вам найти идеальную недвижимость в Хургаде. Расскажите, что вас интересует?
+                <strong>🏠 Zizu:</strong> Hello! I'm Zizu, your real estate assistant in Hurghada. I can help you find the perfect property to buy or rent. What are you looking for?
             </div>
         </div>
         
         <div class="input-container">
-            <input type="text" id="userInput" placeholder="Например: Ищу квартиру у моря до 50,000 USD..." />
-            <button onclick="sendMessage()">Отправить</button>
+            <input type="text" id="userInput" placeholder="For example: I'm looking for a 2-bedroom apartment near the beach..." />
+            <button onclick="sendMessage()">Send</button>
         </div>
     </div>
 
     <script>
         let sessionId = 'session_' + Date.now();
+        let currentLanguage = 'en';
+        
+        function switchLanguage(lang) {
+            currentLanguage = lang;
+            
+            // Update button styles
+            document.querySelectorAll('.language-switch button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.getElementById('btn-' + lang).classList.add('active');
+            
+            // Update placeholder text
+            const input = document.getElementById('userInput');
+            const placeholders = {
+                'en': 'For example: I\'m looking for a 2-bedroom apartment near the beach...',
+                'ru': 'Например: Ищу двухкомнатную квартиру у моря...',
+                'ar': 'مثال: أبحث عن شقة بغرفتين قرب الشاطئ...'
+            };
+            input.placeholder = placeholders[lang];
+        }
         
         async function sendMessage() {
             const input = document.getElementById('userInput');
@@ -72,7 +101,7 @@ app.get("/", (req, res) => {
             // Добавляем сообщение пользователя
             const userDiv = document.createElement('div');
             userDiv.className = 'message user-message';
-            userDiv.innerHTML = '<strong>Вы:</strong> ' + message;
+            userDiv.innerHTML = '<strong>You:</strong> ' + message;
             messagesDiv.appendChild(userDiv);
             
             // Очищаем поле ввода
@@ -81,7 +110,7 @@ app.get("/", (req, res) => {
             // Показываем загрузку
             const loadingDiv = document.createElement('div');
             loadingDiv.className = 'message loading';
-            loadingDiv.innerHTML = '🤖 Консультант думает...';
+            loadingDiv.innerHTML = '🏠 Zizu is thinking...';
             messagesDiv.appendChild(loadingDiv);
             
             // Прокручиваем вниз
@@ -94,7 +123,8 @@ app.get("/", (req, res) => {
                     body: JSON.stringify({ 
                         message: message, 
                         task: 'consult',
-                        sessionId: sessionId
+                        sessionId: sessionId,
+                        language: currentLanguage
                     })
                 });
                 
@@ -113,27 +143,27 @@ app.get("/", (req, res) => {
                         responseText += data.consult.advice.join('<br>') + '<br><br>';
                     }
                     if (data.consult.next_questions && data.consult.next_questions.length > 0) {
-                        responseText += '<strong>Дополнительные вопросы:</strong><br>' + data.consult.next_questions.join('<br>') + '<br><br>';
+                        responseText += '<strong>Additional questions:</strong><br>' + data.consult.next_questions.join('<br>') + '<br><br>';
                     }
                     if (data.consult.next_action) {
-                        responseText += '<strong>Следующий шаг:</strong> ' + data.consult.next_action;
+                        responseText += '<strong>Next step:</strong> ' + data.consult.next_action;
                     }
                     
                     // Если нужно собрать контакты
                     if (data.need_contact && data.contact_form) {
                         responseText += '<br><br><div class="contact-form">';
-                        responseText += '<strong>📞 Оставьте контакты для персональной консультации:</strong><br>';
-                        responseText += '<input type="text" id="leadName" placeholder="Ваше имя" /><br>';
+                        responseText += '<strong>📞 Leave your contacts for personalized consultation:</strong><br>';
+                        responseText += '<input type="text" id="leadName" placeholder="Your name" /><br>';
                         responseText += '<input type="email" id="leadEmail" placeholder="Email" /><br>';
-                        responseText += '<input type="tel" id="leadPhone" placeholder="Телефон" /><br>';
-                        responseText += '<button onclick="submitLead()">Отправить контакты</button>';
+                        responseText += '<input type="tel" id="leadPhone" placeholder="Phone number" /><br>';
+                        responseText += '<button onclick="submitLead()">Send contacts</button>';
                         responseText += '</div>';
                     }
                 } else {
-                    responseText = 'Спасибо за ваш вопрос! Я передам его нашему менеджеру.';
+                    responseText = 'Thank you for your question! I will pass it to our manager.';
                 }
                 
-                botDiv.innerHTML = '<strong>🤖 Консультант:</strong> ' + responseText;
+                botDiv.innerHTML = '<strong>�� Zizu:</strong> ' + responseText;
                 messagesDiv.appendChild(botDiv);
                 
             } catch (error) {
@@ -143,7 +173,7 @@ app.get("/", (req, res) => {
                 // Показываем ошибку
                 const errorDiv = document.createElement('div');
                 errorDiv.className = 'message bot-message';
-                errorDiv.innerHTML = '<strong>🤖 Консультант:</strong> Извините, произошла ошибка. Попробуйте еще раз.';
+                errorDiv.innerHTML = '<strong>🏠 Zizu:</strong> Sorry, an error occurred. Please try again.';
                 messagesDiv.appendChild(errorDiv);
             }
             
@@ -157,7 +187,7 @@ app.get("/", (req, res) => {
             const phone = document.getElementById('leadPhone').value;
             
             if (!name || !email || !phone) {
-                alert('Пожалуйста, заполните все поля');
+                alert('Please fill in all fields');
                 return;
             }
             
@@ -173,16 +203,16 @@ app.get("/", (req, res) => {
                     })
                 });
                 
-                alert('Спасибо! Мы свяжемся с вами в ближайшее время.');
+                alert('Thank you! We will contact you soon.');
                 
                 // Убираем форму
                 const contactForm = document.querySelector('.contact-form');
                 if (contactForm) {
-                    contactForm.innerHTML = '<strong>✅ Контакты получены! Мы свяжемся с вами.</strong>';
+                    contactForm.innerHTML = '<strong>✅ Contacts received! We will contact you.</strong>';
                 }
                 
             } catch (error) {
-                alert('Ошибка при отправке контактов');
+                alert('Error sending contacts');
             }
         }
         
@@ -198,31 +228,41 @@ app.get("/", (req, res) => {
   `);
 });
 
-// Улучшенный промпт для сбора лидов
+// Обновленный промпт для Zizu
 const SYSTEM_PROMPT = `
-You are a professional real estate sales assistant for Hurghada, Egypt. Your goal is to collect leads and provide excellent customer service.
+You are Zizu, a friendly and professional real estate assistant for Hurghada, Egypt. You help clients with both buying and renting properties.
 
 IMPORTANT: Always try to collect contact information (name, email, phone) from interested clients.
 
+Your personality:
+- Friendly, helpful, and knowledgeable
+- Professional but approachable
+- Always speak from first person as Zizu
+- Be enthusiastic about helping clients find their perfect property
+
 Tasks: (1) consult; (2) classify lead; (3) handoff to manager.
-Always reply in the user's language. If Arabic, use concise Modern Standard Arabic.
+Always reply in the user's language. Default to English if language is not specified.
 
 Rules:
+- Always introduce yourself as Zizu
 - Be friendly, professional, and helpful
 - Ask specific questions to understand client needs
 - Always try to get contact information for serious inquiries
-- Do not invent listings, prices, or guarantees
-- Collect: area (Hurghada districts: El Kawther, Intercontinental, Al Ahyaa/Al Ahia, Mubarak areas, Sahl Hasheesh, Makadi, El Gouna), budget + currency (USD/EUR/EGP), type (apartment/house), rooms, size, distance to sea, beach access/pool, furnished, new build vs resale, payment plan/installments, purchase timing, citizenship/residency, purpose (investment/living), preferred contact/channel/timezone/language, consent for contact.
+- Do not invent specific listings, prices, or guarantees
+- Do not suggest specific areas/districts unless client mentions them
+- Focus on both buying AND renting properties
+- Collect: property type (apartment/house/villa), rooms, size, budget + currency (USD/EUR/EGP), purpose (buy/rent), timing, location preferences, distance to sea, beach access/pool, furnished, new build vs resale, payment plan/installments, citizenship/residency, preferred contact/channel/timezone/language, consent for contact.
 
 Lead Collection Strategy:
 - After 2-3 exchanges, if client seems interested, ask for contact details
 - Offer personalized consultation as incentive
 - Mention that you'll send them specific listings
 - Be persistent but not pushy
+- Always end with a clear next step
 
 Output strictly valid JSON with these top-level fields:
 - task: "consult" | "classify" | "handoff"
-- language: "ru" | "uk" | "en" | "de" | "ar"
+- language: "en" | "ru" | "ar" | "de" | "uk"
 - need_contact: boolean (true if should ask for contact info)
 - contact_form: boolean (true if should show contact form)
 - consult?: { next_questions?: string[], advice?: string[], next_action?: string }
@@ -264,7 +304,7 @@ function saveConversation(sessionId, message, response) {
 
 app.post("/chat", async (req, res) => {
   try {
-    const { message, task = "consult", sessionId } = req.body || {};
+    const { message, task = "consult", sessionId, language = "en" } = req.body || {};
     if (typeof message !== "string" || !message.trim()) {
       return res.status(400).json({ error: "bad_request", details: "message is required" });
     }
@@ -275,7 +315,7 @@ app.post("/chat", async (req, res) => {
       response_format: { type: "json_object" },
       messages: [
         { role: "system", content: SYSTEM_PROMPT },
-        { role: "user", content: `task=${task}\n${message}` }
+        { role: "user", content: `task=${task}\nlanguage=${language}\n${message}` }
       ]
     });
 
@@ -346,7 +386,7 @@ app.get("/leads", (req, res) => {
 
 // Экспорт лидов в CSV
 app.get("/export/leads.csv", (req, res) => {
-  const csvHeader = "ID,Дата,Имя,Email,Телефон,Сообщений\n";
+  const csvHeader = "ID,Date,Name,Email,Phone,Messages\n";
   const csvData = leads.map(lead => 
     `${lead.id},${lead.timestamp},${lead.name},${lead.email},${lead.phone},${lead.conversation.length}`
   ).join('\n');
