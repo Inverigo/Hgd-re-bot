@@ -14,7 +14,7 @@
     --muted: #8d8d8d;
   }
   html,body{height:100%;margin:0;font-family:'Poppins',sans-serif;background:var(--bg);}
-  .page {max-width:920px;margin:28px auto;padding:18px;}
+  .page {max-width:920px;margin:28px auto;padding:18px;box-sizing:border-box;}
   .chat-box{
     background:var(--card);
     border-radius:14px;
@@ -43,28 +43,28 @@
     transform:translateY(-1px);
   }
   .messages{flex:1 1 auto;border-radius:10px;padding:14px;background:#fbfbfb;
-    overflow:auto;border:1px solid rgba(10,10,10,0.04);box-sizing:border-box;}
+    overflow:auto;border:1px solid rgba(10,10,10,0.04);box-sizing:border-box;display:flex;flex-direction:column;}
   .msg{max-width:78%;padding:10px 12px;border-radius:10px;margin-bottom:10px;line-height:1.35;}
   .msg.bot{background:#eef9f6;color:#05332b;align-self:flex-start;}
   .msg.user{background:var(--brand);color:#fff;align-self:flex-end;text-align:right;}
-  .input-area{margin-top:12px;position:sticky;bottom:0;padding-top:12px;z-index:2;background:var(--card);}
+  .input-area{margin-top:12px;position:sticky;bottom:0;padding-top:12px;z-index:2;background:transparent;}
   .input-row{display:flex;gap:10px;align-items:center;}
   .input-row input[type="text"]{
     flex:1;padding:12px 14px;border-radius:10px;border:1px solid #e0e0e0;font-size:15px;box-sizing:border-box;}
   .btn{padding:11px 14px;border-radius:10px;background:var(--brand);color:#fff;border:0;cursor:pointer;font-size:15px;}
   .btn.ghost{background:transparent;color:var(--brand);border:1px solid rgba(11,90,52,0.08);}
   .input-row .btn.small{padding:10px 12px;}
+  /* overlay always present (no display toggling) */
   #overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
-    background:rgba(10,10,10,0.45);opacity:0;pointer-events:none;transition:opacity .18s ease;}
+    background:rgba(10,10,10,0.45);opacity:0;pointer-events:none;transition:opacity .22s ease;}
   #overlay.visible{opacity:1;pointer-events:auto;}
   .lead-card{
     width:520px;max-width:92%;background:var(--card);
     border-radius:12px;padding:20px;box-shadow:0 20px 60px rgba(0,0,0,0.18);
-    transform:translateY(-6px);opacity:0;transition:transform .2s ease,opacity .2s;position:relative;}
-  #overlay.visible .lead-card{transform:none;opacity:1;}
+    transform:translateY(-10px);opacity:0;transition:transform .2s ease,opacity .2s;position:relative;}
+  #overlay.visible .lead-card{transform:translateY(0);opacity:1;}
   .lead-title{margin:0 0 12px;font-size:18px;color:var(--brand);font-weight:600;}
-  .close-btn{all:unset;position:absolute;top:12px;right:12px;width:28px;height:28px;
-    display:flex;align-items:center;justify-content:center;border-radius:50%;cursor:pointer;}
+  .close-btn{all:unset;position:absolute;top:12px;right:12px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:50%;cursor:pointer;}
   .close-btn svg{width:18px;height:18px;stroke:#444;}
   .close-btn:hover{background:#f6f6f6;}
   .lead-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:10px;}
@@ -72,8 +72,7 @@
   input[type="text"],input[type="email"],input[type="tel"],select,textarea{
     width:100%;padding:10px;border-radius:8px;border:1px solid #e6e6e6;box-sizing:border-box;font-size:14px;}
   textarea{min-height:96px;resize:vertical;}
-  .lead-submit{margin-top:8px;display:block;width:100%;padding:12px;font-size:15px;
-    border-radius:8px;border:0;background:var(--brand);color:#fff;cursor:pointer;}
+  .lead-submit{margin-top:8px;display:block;width:100%;padding:12px;font-size:15px;border-radius:8px;border:0;background:var(--brand);color:#fff;cursor:pointer;}
   .status{margin-top:8px;font-size:14px;color:var(--muted);text-align:center;}
   @media (max-width:640px){
     .lead-card{padding:16px;}
@@ -88,21 +87,22 @@
   <div class="page">
     <div class="chat-box" role="application" aria-label="Zizu chat">
       <div class="header">
-        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 9.75L12 3l9 6.75v10.5a.75.75 0 0 1-.75.75h-5.25a.75.75 0 0 1-.75-.75V15a.75.75 0 0 0-.75-.75h-3a.75.75 0 0 0-.75.75v5.25a.75.75 0 0 1-.75.75H3.75A.75.75 0 0 1 3 20.25V9.75z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <!-- SVG logo -->
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9.75L12 3l9 6.75v10.5a.75.75 0 0 1-.75.75h-5.25a.75.75 0 0 1-.75-.75V15a.75.75 0 0 0-.75-.75h-3a.75.75 0 0 0-.75.75v5.25a.75.75 0 0 1-.75.75H3.75A.75.75 0 0 1 3 20.25V9.75z" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         <h1 class="title">Zizu Real Estate Assistant</h1>
       </div>
 
-      <div class="scenarios" role="tablist">
+      <div class="scenarios" role="tablist" aria-label="Scenarios">
         <button data-scenario="buy" class="scenario-btn">
-          <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 9.75L12 3l9 6.75v10.5a.75.75 0 0 1-.75.75h-5.25a.75.75 0 0 1-.75-.75V15a.75.75 0 0 0-.75-.75h-3a.75.75 0 0 0-.75.75v5.25a.75.75 0 0 1-.75.75H3.75A.75.75 0 0 1 3 20.25V9.75z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9.75L12 3l9 6.75v10.5" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
           Buy
         </button>
         <button data-scenario="rent" class="scenario-btn">
-          <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 6h16M4 12h16M4 18h16" stroke-width="1.4" stroke-linecap="round"/></svg>
           Rent
         </button>
         <button data-scenario="sell" class="scenario-btn">
-          <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 3h18M3 9h18M3 15h18M3 21h18" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 7h18M3 12h18M3 17h18" stroke-width="1.4" stroke-linecap="round"/></svg>
           Sell
         </button>
       </div>
@@ -121,11 +121,14 @@
     </div>
   </div>
 
+  <!-- overlay lead form (always in DOM) -->
   <div id="overlay" aria-hidden="true">
     <div class="lead-card" role="dialog" aria-modal="true" aria-labelledby="leadTitle">
       <button class="close-btn" id="leadClose" aria-label="Close">
-        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 6l12 12M6 18L18 6" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <!-- small cross svg -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 6l12 12M6 18L18 6" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
+
       <h3 id="leadTitle" class="lead-title">Leave your contact — our manager will contact you shortly</h3>
 
       <div class="lead-grid">
@@ -147,83 +150,157 @@
   </div>
 
 <script>
-  const messages=document.getElementById('messages');
-  const userInput=document.getElementById('userInput');
-  const sendBtn=document.getElementById('sendBtn');
-  const scenarioButtons=document.querySelectorAll('.scenario-btn');
-  const leadOpen=document.getElementById('leadOpen');
-  const overlay=document.getElementById('overlay');
-  const leadClose=document.getElementById('leadClose');
-  const leadSubmit=document.getElementById('leadSubmit');
-  const leadStatus=document.getElementById('leadStatus');
-  let sessionId='sess_'+Date.now();
-  let currentScenario=null;
-  let messageCount=0;
-  function appendMessage(text,from='bot'){
-    const el=document.createElement('div');
-    el.className='msg '+(from==='user'?'user':'bot');
-    el.textContent=text;
-    el.style.alignSelf=(from==='user')?'flex-end':'flex-start';
+  // DOM refs
+  const messages = document.getElementById('messages');
+  const userInput = document.getElementById('userInput');
+  const sendBtn = document.getElementById('sendBtn');
+  const scenarioButtons = document.querySelectorAll('.scenario-btn');
+  const leadOpen = document.getElementById('leadOpen');
+  const overlay = document.getElementById('overlay');
+  const leadClose = document.getElementById('leadClose');
+  const leadSubmit = document.getElementById('leadSubmit');
+  const leadStatus = document.getElementById('leadStatus');
+
+  let sessionId = 'sess_' + Date.now();
+  let currentScenario = null;
+  let messageCount = 0;
+
+  // Append message helper
+  function appendMessage(text, from = 'bot'){
+    const el = document.createElement('div');
+    el.className = 'msg ' + (from === 'user' ? 'user' : 'bot');
+    el.textContent = text;
     messages.appendChild(el);
-    messages.scrollTop=messages.scrollHeight;
+    messages.scrollTop = messages.scrollHeight;
   }
-  scenarioButtons.forEach(btn=>{
-    btn.addEventListener('click',()=>{
-      scenarioButtons.forEach(b=>b.classList.remove('active'));
+
+  // Scenario buttons logic
+  scenarioButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      scenarioButtons.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      const scenario=btn.dataset.scenario;
-      currentScenario=scenario;
-      userInput.placeholder=(scenario==='buy')?'Search properties, e.g. 2-bed apartment':
-        (scenario==='rent')?'Specify area, bedrooms, timeline':'Tell us about the property you want to sell';
-      userInput.disabled=false;
-      sendBtn.disabled=true;
-      if(scenario==='buy') appendMessage("Hello! I'm Zizu — I can help you find apartments, villas and compounds to purchase. Where would you like to start?");
-      if(scenario==='rent') appendMessage("Hi! I'll help with rentals. Which area and how many bedrooms?");
-      if(scenario==='sell'){openLead();appendMessage("To sell — please leave contact details and a brief description in the form.");}
+
+      const scenario = btn.dataset.scenario;
+      currentScenario = scenario;
+
+      userInput.disabled = false;
+      sendBtn.disabled = true; // until user types
+
+      userInput.placeholder = scenario === 'buy' ? 'Search properties, e.g. 2-bed apartment' :
+                           scenario === 'rent' ? 'Specify area, bedrooms, timeline' :
+                           'Tell us about the property you want to sell';
+
+      // Friendly greeting (no noisy technical messages)
+      if (scenario === 'buy') appendMessage("Hello! I'm Zizu — I can help you find apartments, villas and compounds to purchase. Where would you like to start?");
+      else if (scenario === 'rent') appendMessage("Hi! I'll help with rentals. Which area and how many bedrooms?");
+      else if (scenario === 'sell') { openLead(); appendMessage("To sell — please leave contact details and a brief description in the form."); }
     });
   });
-  userInput.addEventListener('input',()=>{sendBtn.disabled=!userInput.value.trim();});
-  sendBtn.addEventListener('click',sendMessage);
-  userInput.addEventListener('keypress',e=>{if(e.key==='Enter'){e.preventDefault();if(!sendBtn.disabled)sendMessage();}});
-  async function sendMessage(){
-    const text=userInput.value.trim();if(!text)return;
-    appendMessage(text,'user');userInput.value='';sendBtn.disabled=true;messageCount++;
-    if(messageCount%4===0)openLead();
-    try{
-      const res=await fetch('/chat',{method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({message:text,sessionId,scenario:currentScenario})});
-      if(!res.ok)throw new Error('server '+res.status);
-      const data=await res.json();
-      appendMessage(data.reply||'No reply from server.');
-      if(data.showContactForm)openLead();
-    }catch(err){console.warn('chat fetch failed:',err);
-      setTimeout(()=>appendMessage("Thanks — we'll review this and get back to you soon."),450);}
-  }
-  function openLead(){overlay.classList.add('visible');overlay.setAttribute('aria-hidden','false');setTimeout(()=>document.getElementById('leadName').focus(),120);}
-  function closeLead(){overlay.classList.remove('visible');overlay.setAttribute('aria-hidden','true');}
-  leadOpen.addEventListener('click',openLead);
-  leadClose.addEventListener('click',closeLead);
-  overlay.addEventListener('click',e=>{if(e.target===overlay)closeLead();});
-  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeLead();});
-  leadSubmit.addEventListener('click',async()=>{
-    leadStatus.textContent='';
-    const name=document.getElementById('leadName').value.trim();
-    const email=document.getElementById('leadEmail').value.trim();
-    const phone=document.getElementById('leadPhone').value.trim();
-    const planning=document.getElementById('leadPlanning').value;
-    const desc=document.getElementById('leadDesc').value.trim();
-    const emailRe=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if(!name||!emailRe.test(email)||!phone){leadStatus.textContent='Please enter a valid name, email and phone.';return;}
-    leadStatus.textContent='Sending...';
-    try{
-      const res=await fetch('/lead',{method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({name,email,phone,planning,desc,sessionId,scenario:currentScenario})});
-      if(!res.ok)throw new Error('lead send failed '+res.status);
-      leadStatus.textContent='Thanks — we will contact you soon.';
-      setTimeout(()=>{leadStatus.textContent='';closeLead();},1200);
-    }catch(err){console.warn('lead send failed',err);leadStatus.textContent='Error sending lead — please try again later.';}
+
+  // Input enable/disable
+  userInput.addEventListener('input', () => {
+    sendBtn.disabled = !userInput.value.trim();
   });
-  appendMessage('Welcome! Choose Buy / Rent / Sell to start.','bot');
+
+  // Send message (safe fallback if backend absent)
+  sendBtn.addEventListener('click', sendMessage);
+  userInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); if (!sendBtn.disabled) sendMessage(); }
+  });
+
+  async function sendMessage(){
+    const text = userInput.value.trim();
+    if (!text) return;
+    appendMessage(text, 'user');
+    userInput.value = '';
+    sendBtn.disabled = true;
+    messageCount++;
+
+    if (messageCount % 4 === 0) openLead();
+
+    try {
+      const res = await fetch('/chat', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ message: text, sessionId, scenario: currentScenario })
+      });
+      if (!res.ok) throw new Error('server ' + res.status);
+      const data = await res.json();
+      appendMessage(data.reply || 'No reply from server.');
+      if (data.showContactForm) openLead();
+    } catch (err) {
+      // graceful fallback: UI remains responsive
+      console.warn('chat fetch failed:', err);
+      setTimeout(()=> appendMessage("Thanks — we'll review this and get back to you soon."), 450);
+    }
+  }
+
+  // Overlay control: OPEN/close clean and robust (no display toggling)
+  function openLead(){
+    // clear previous status
+    leadStatus.textContent = '';
+    overlay.classList.add('visible');
+    overlay.setAttribute('aria-hidden', 'false');
+    // lock body scroll while modal open
+    document.body.style.overflow = 'hidden';
+    // focus first field after animation start
+    setTimeout(()=> {
+      const el = document.getElementById('leadName');
+      if (el) el.focus();
+    }, 140);
+  }
+
+  function closeLead(){
+    overlay.classList.remove('visible');
+    overlay.setAttribute('aria-hidden', 'true');
+    // restore scroll
+    document.body.style.overflow = '';
+    // reset status after closing animation
+    setTimeout(()=> { leadStatus.textContent = ''; }, 220);
+  }
+
+  // Wire buttons & interactions
+  leadOpen.addEventListener('click', openLead);
+  leadClose.addEventListener('click', closeLead);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) closeLead(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLead(); });
+
+  // Submit lead
+  leadSubmit.addEventListener('click', async () => {
+    leadStatus.textContent = '';
+    const name = document.getElementById('leadName').value.trim();
+    const email = document.getElementById('leadEmail').value.trim();
+    const phone = document.getElementById('leadPhone').value.trim();
+    const planning = document.getElementById('leadPlanning').value;
+    const desc = document.getElementById('leadDesc').value.trim();
+    const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!name || !emailRe.test(email) || !phone) {
+      leadStatus.textContent = 'Please enter a valid name, email and phone.';
+      return;
+    }
+    leadStatus.textContent = 'Sending...';
+    try {
+      const res = await fetch('/lead', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ name, email, phone, planning, desc, sessionId, scenario: currentScenario })
+      });
+      if (!res.ok) throw new Error('lead send failed ' + res.status);
+      leadStatus.textContent = 'Thanks — we will contact you soon.';
+      setTimeout(() => { leadStatus.textContent = ''; closeLead(); }, 1100);
+    } catch (err) {
+      console.warn('lead send failed', err);
+      leadStatus.textContent = 'Error sending lead — please try again later.';
+    }
+  });
+
+  // phone input gentle filter
+  document.getElementById('leadPhone').addEventListener('input', (e) => {
+    e.target.value = e.target.value.replace(/[^0-9+()\- \s]/g, '');
+  });
+
+  // initial hint
+  appendMessage('Welcome! Choose Buy / Rent / Sell to start.', 'bot');
 </script>
 </body>
 </html>
