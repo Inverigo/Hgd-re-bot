@@ -1,14 +1,20 @@
 {
-  "name": "hurghada-re-bot",
+  "name": "hgd-re-bot",
   "version": "1.0.0",
-  "type": "module",
+  "description": "Real estate chatbot for Hurghada",
   "main": "server.js",
+  "type": "module",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "dev": "node server.js"
   },
   "dependencies": {
+    "express": "^4.18.2",
     "cors": "^2.8.5",
-    "express": "^4.19.2",
-    "openai": "^4.57.0"
-  }
+    "openai": "^4.20.1",
+    "nodemailer": "^6.9.7"
+  },
+  "keywords": ["chatbot", "real-estate", "hurghada"],
+  "author": "Your Name",
+  "license": "MIT"
 }
