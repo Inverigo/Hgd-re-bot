@@ -1,343 +1,229 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Zizu - Real Estate Assistant</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-  <style>
-    body {
-      background: #fdf6e3;
-      font-family: 'Poppins', sans-serif;
-      margin: 0;
-      padding: 20px;
-      max-width: 600px;
-      margin: auto;
-    }
-    .chat-box {
-      background: white;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      position: relative;
-    }
-    .bot-title {
-      font-size: 28px;
-      text-align: center;
-      color: #004225;
-      font-weight: 600;
-      margin-bottom: 20px;
-    }
-    .message {
-      margin-bottom: 12px;
-      padding: 12px;
-      border-radius: 12px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      animation: fadeIn 0.3s ease-in-out;
-    }
-    .user {
-      background: #004225;
-      color: white;
-      text-align: right;
-    }
-    .bot {
-      background: #e3f2fd;
-      color: #333;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .quick-buttons {
-      display: flex;
-      justify-content: center;
-      gap: 15px;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
-    }
-    .quick-buttons button {
-      background-color: #004225;
-      color: white;
-      border: none;
-      padding: 12px 20px;
-      border-radius: 8px;
-      font-size: 16px;
-      cursor: pointer;
-      transition: background 0.3s ease, transform 0.2s ease;
-    }
-    .quick-buttons button:hover {
-      background-color: #006837;
-      transform: scale(1.05);
-    }
-    .quick-buttons button.active {
-      background-color: #00994d;
-    }
-    .input-container {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-top: 10px;
-    }
-    input, button, textarea, select {
-      font-family: 'Poppins', sans-serif;
-      padding: 10px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      font-size: 16px;
-    }
-    button {
-      background-color: #004225;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-    #contactOverlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(0,0,0,0.5);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-    #contactOverlay.active {
-      display: flex;
-      opacity: 1;
-    }
-    .contact-form {
-      background: white;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-      max-width: 90%;
-      width: 400px;
-      position: relative;
-      animation: slideIn 0.3s ease;
-    }
-    @keyframes slideIn {
-      from { transform: translateY(-20px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
-    }
-    .contact-form input,
-    .contact-form select,
-    .contact-form textarea {
-      width: 100%;
-      box-sizing: border-box;
-      margin-bottom: 12px;
-    }
-    .contact-form button {
-      width: 100%;
-      padding: 12px;
-      font-size: 16px;
-      border-radius: 6px;
-      background-color: #004225;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-    .contact-form button:hover {
-      background-color: #006837;
-    }
-    .close-btn {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      width: 32px;
-      height: 32px;
-      border: none;
-      border-radius: 50%;
-      background: transparent;
-      color: #666;
-      font-size: 20px;
-      line-height: 32px;
-      text-align: center;
-      cursor: pointer;
-      padding: 0;
-    }
-    .close-btn:hover {
-      background: #f0f0f0;
-      color: #000;
-    }
-    #submitStatus {
-      text-align: center;
-      margin-top: 10px;
-      font-size: 16px;
-    }
-    @media (max-width: 600px) {
-      .chat-box {
-        padding: 10px;
-      }
-      input, button, textarea {
-        font-size: 16px;
-      }
-    }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Zizu — Real Estate Assistant</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #f4efe3;
+    --card: #ffffff;
+    --brand: #0b5a34;
+    --brand-strong: #0d7a45;
+    --muted: #8d8d8d;
+  }
+  html,body{height:100%;margin:0;font-family:'Poppins',sans-serif;background:var(--bg);}
+  .page {max-width:920px;margin:28px auto;padding:18px;}
+  .chat-box{
+    background:var(--card);
+    border-radius:14px;
+    box-shadow:0 10px 30px rgba(6,6,6,0.08);
+    padding:20px;
+    display:flex;
+    flex-direction:column;
+    height:720px;
+    box-sizing:border-box;
+  }
+  .header{display:flex;align-items:center;gap:12px;justify-content:center;margin-bottom:8px;}
+  .title{font-size:24px;font-weight:600;color:var(--brand);margin:0;}
+  .icon{width:28px;height:28px;flex:none;}
+  .scenarios{display:flex;justify-content:center;gap:12px;margin:14px 0;}
+  .scenarios button{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:10px 16px;border-radius:10px;
+    border:1px solid rgba(6,90,52,0.08);
+    background:linear-gradient(180deg,#f7fbf7,#f0f7f0);
+    color:var(--brand);cursor:pointer;font-size:15px;min-width:110px;
+    transition:all .12s;
+  }
+  .scenarios button.active{
+    background:linear-gradient(180deg,var(--brand),var(--brand-strong));
+    color:#fff;box-shadow:0 6px 18px rgba(11,90,52,0.12);
+    transform:translateY(-1px);
+  }
+  .messages{flex:1 1 auto;border-radius:10px;padding:14px;background:#fbfbfb;
+    overflow:auto;border:1px solid rgba(10,10,10,0.04);box-sizing:border-box;}
+  .msg{max-width:78%;padding:10px 12px;border-radius:10px;margin-bottom:10px;line-height:1.35;}
+  .msg.bot{background:#eef9f6;color:#05332b;align-self:flex-start;}
+  .msg.user{background:var(--brand);color:#fff;align-self:flex-end;text-align:right;}
+  .input-area{margin-top:12px;position:sticky;bottom:0;padding-top:12px;z-index:2;background:var(--card);}
+  .input-row{display:flex;gap:10px;align-items:center;}
+  .input-row input[type="text"]{
+    flex:1;padding:12px 14px;border-radius:10px;border:1px solid #e0e0e0;font-size:15px;box-sizing:border-box;}
+  .btn{padding:11px 14px;border-radius:10px;background:var(--brand);color:#fff;border:0;cursor:pointer;font-size:15px;}
+  .btn.ghost{background:transparent;color:var(--brand);border:1px solid rgba(11,90,52,0.08);}
+  .input-row .btn.small{padding:10px 12px;}
+  #overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+    background:rgba(10,10,10,0.45);opacity:0;pointer-events:none;transition:opacity .18s ease;}
+  #overlay.visible{opacity:1;pointer-events:auto;}
+  .lead-card{
+    width:520px;max-width:92%;background:var(--card);
+    border-radius:12px;padding:20px;box-shadow:0 20px 60px rgba(0,0,0,0.18);
+    transform:translateY(-6px);opacity:0;transition:transform .2s ease,opacity .2s;position:relative;}
+  #overlay.visible .lead-card{transform:none;opacity:1;}
+  .lead-title{margin:0 0 12px;font-size:18px;color:var(--brand);font-weight:600;}
+  .close-btn{all:unset;position:absolute;top:12px;right:12px;width:28px;height:28px;
+    display:flex;align-items:center;justify-content:center;border-radius:50%;cursor:pointer;}
+  .close-btn svg{width:18px;height:18px;stroke:#444;}
+  .close-btn:hover{background:#f6f6f6;}
+  .lead-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:10px;}
+  .lead-grid .full{grid-column:1/-1;}
+  input[type="text"],input[type="email"],input[type="tel"],select,textarea{
+    width:100%;padding:10px;border-radius:8px;border:1px solid #e6e6e6;box-sizing:border-box;font-size:14px;}
+  textarea{min-height:96px;resize:vertical;}
+  .lead-submit{margin-top:8px;display:block;width:100%;padding:12px;font-size:15px;
+    border-radius:8px;border:0;background:var(--brand);color:#fff;cursor:pointer;}
+  .status{margin-top:8px;font-size:14px;color:var(--muted);text-align:center;}
+  @media (max-width:640px){
+    .lead-card{padding:16px;}
+    .lead-grid{grid-template-columns:1fr;}
+    .chat-box{height:calc(100vh - 48px);}
+    .input-row{flex-direction:column;align-items:stretch;}
+    .input-row .small{width:100%;}
+  }
+</style>
 </head>
 <body>
-  <div class="chat-box">
-    <h1 class="bot-title">🏠 Zizu Real Estate Assistant</h1>
-    <div class="quick-buttons">
-      <button id="buyBtn" onclick="startScenario('buy')">🏠 Buy</button>
-      <button id="rentBtn" onclick="startScenario('rent')">📦 Rent</button>
-      <button id="sellBtn" onclick="startScenario('sell')">💼 Sell</button>
-    </div>
-    <div id="messages"></div>
-    <div class="input-container">
-      <input id="userInput" placeholder="Please select an action above" disabled />
-      <button onclick="sendMessage()" disabled id="sendBtn">Send</button>
-      <button onclick="openLeadForm()" id="leadBtn">📋 Leave Contact</button>
+  <div class="page">
+    <div class="chat-box" role="application" aria-label="Zizu chat">
+      <div class="header">
+        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 9.75L12 3l9 6.75v10.5a.75.75 0 0 1-.75.75h-5.25a.75.75 0 0 1-.75-.75V15a.75.75 0 0 0-.75-.75h-3a.75.75 0 0 0-.75.75v5.25a.75.75 0 0 1-.75.75H3.75A.75.75 0 0 1 3 20.25V9.75z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <h1 class="title">Zizu Real Estate Assistant</h1>
+      </div>
+
+      <div class="scenarios" role="tablist">
+        <button data-scenario="buy" class="scenario-btn">
+          <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 9.75L12 3l9 6.75v10.5a.75.75 0 0 1-.75.75h-5.25a.75.75 0 0 1-.75-.75V15a.75.75 0 0 0-.75-.75h-3a.75.75 0 0 0-.75.75v5.25a.75.75 0 0 1-.75.75H3.75A.75.75 0 0 1 3 20.25V9.75z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Buy
+        </button>
+        <button data-scenario="rent" class="scenario-btn">
+          <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16" stroke-width="1.5" stroke-linecap="round"/></svg>
+          Rent
+        </button>
+        <button data-scenario="sell" class="scenario-btn">
+          <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 3h18M3 9h18M3 15h18M3 21h18" stroke-width="1.5" stroke-linecap="round"/></svg>
+          Sell
+        </button>
+      </div>
+
+      <div id="messages" class="messages" aria-live="polite" role="log"></div>
+
+      <div class="input-area">
+        <div class="input-row">
+          <input id="userInput" type="text" placeholder="Please select a scenario above" autocomplete="off" />
+          <button id="sendBtn" class="btn small" disabled>Send</button>
+        </div>
+        <div style="margin-top:8px; display:flex; gap:10px;">
+          <button id="leadOpen" class="btn ghost">📋 Leave Contact</button>
+        </div>
+      </div>
     </div>
   </div>
 
-  <div id="contactOverlay">
-    <div class="contact-form">
-      <button class="close-btn" onclick="closeForm()">✖</button>
-      <h3>📋 Leave your contact details so our manager can reach out to you</h3>
-      <input id="leadName" placeholder="Your name" />
-      <input id="leadEmail" placeholder="Email" />
-      <input id="leadPhone" placeholder="Phone number" oninput="validatePhone(this)" />
-      <select id="leadPlanning">
-        <option value="">Planning horizon</option>
-        <option value="Urgent">Urgent</option>
-        <option value="1–2 months">1–2 months</option>
-        <option value="3–5 months">3–5 months</option>
-      </select>
-      <textarea id="leadDescription" placeholder="Brief description of the apartment and area"></textarea>
-      <button onclick="submitLead()">Submit</button>
-      <div id="submitStatus"></div>
+  <div id="overlay" aria-hidden="true">
+    <div class="lead-card" role="dialog" aria-modal="true" aria-labelledby="leadTitle">
+      <button class="close-btn" id="leadClose" aria-label="Close">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 6l12 12M6 18L18 6" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+      <h3 id="leadTitle" class="lead-title">Leave your contact — our manager will contact you shortly</h3>
+
+      <div class="lead-grid">
+        <input id="leadName" type="text" placeholder="Your name" />
+        <input id="leadEmail" type="email" placeholder="Email" />
+        <input id="leadPhone" type="tel" placeholder="Phone number" />
+        <select id="leadPlanning">
+          <option value="">Planning horizon</option>
+          <option value="urgent">Urgent</option>
+          <option value="1-2">1–2 months</option>
+          <option value="3-5">3–5 months</option>
+        </select>
+        <textarea id="leadDesc" class="full" placeholder="Brief description of the apartment and area"></textarea>
+      </div>
+
+      <button id="leadSubmit" class="lead-submit">Submit</button>
+      <div id="leadStatus" class="status" aria-live="polite"></div>
     </div>
   </div>
 
-  <script>
-    const messagesDiv = document.getElementById("messages");
-    const input = document.getElementById("userInput");
-    const sendBtn = document.getElementById("sendBtn");
-    const sessionId = "session_" + Date.now();
-    let messageCount = 0;
-
-    function addBotMessage(text) {
-      messagesDiv.innerHTML += `<div class="message bot">${text}</div>`;
-      messagesDiv.scrollTo({ top: messagesDiv.scrollHeight, behavior: "smooth" });
-    }
-
-    function addUserMessage(text) {
-      messagesDiv.innerHTML += `<div class="message user">${text}</div>`;
-      messagesDiv.scrollTo({ top: messagesDiv.scrollHeight, behavior: "smooth" });
-    }
-
-    function enableInput() {
-      input.disabled = false;
-      sendBtn.disabled = false;
-      input.placeholder = "Type your message...";
-      input.focus();
-    }
-
-    function setActiveButton(id) {
-      document.querySelectorAll(".quick-buttons button").forEach(btn => {
-        btn.classList.remove("active");
-      });
-      document.getElementById(id).classList.add("active");
-    }
-
-    function startScenario(type) {
-      enableInput();
-      if (type === "buy") {
-        setActiveButton("buyBtn");
-        addBotMessage("Hello! I'm Zizu, your real estate assistant in Hurghada. We have over 100 properties available for purchase — apartments, villas, and compounds. What are you looking for?");
-      } else if (type === "rent") {
-        setActiveButton("rentBtn");
-        addBotMessage("Hi! I'm Zizu, your rental assistant in Hurghada. Let's find the perfect place for you. Could you tell me which area you're interested in, how many bedrooms you need, and your rental timeline?");
-      } else if (type === "sell") {
-        setActiveButton("sellBtn");
-        openLeadForm();
-        addBotMessage("Great! To help you sell your property, please leave your contact details and a brief description of the apartment and its location.");
-      }
-    }
-
-    function openLeadForm() {
-      const overlay = document.getElementById("contactOverlay");
-      overlay.classList.add("active");
-    }
-
-    function closeForm() {
-      const overlay = document.getElementById("contactOverlay");
-      overlay.classList.remove("active");
-      setTimeout(() => { overlay.style.display = "none"; }, 300);
-    }
-
-    async function sendMessage() {
-      const message = input.value.trim();
-      if (!message) return;
-      addUserMessage(message);
-      input.value = "";
-      messageCount++;
-
-      if (messageCount % 4 === 0) {
-        openLeadForm();
-      }
-
-      try {
-        const res = await fetch("/chat", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message, sessionId })
-        });
-
-        const data = await res.json();
-        addBotMessage(data.reply || "No reply from server");
-
-        if (data.showContactForm) {
-          openLeadForm();
-        }
-      } catch (err) {
-        addBotMessage("⚠️ Error connecting to server.");
-      }
-    }
-
-    async function submitLead() {
-      const name = document.getElementById("leadName").value.trim();
-      const email = document.getElementById("leadEmail").value.trim();
-      const phone = document.getElementById("leadPhone").value.trim();
-      const planning = document.getElementById("leadPlanning").value;
-      const description = document.getElementById("leadDescription").value.trim();
-      const statusDiv = document.getElementById("submitStatus");
-
-      if (!name || !email || !phone) {
-        alert("Please fill in all required fields.");
-        return;
-      }
-
-      statusDiv.textContent = "🔄 Sending...";
-
-      try {
-        await fetch("/lead", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name, email, phone, planning, description, sessionId })
-        });
-
-        statusDiv.textContent = "✅ Thank you! We'll contact you soon.";
-        setTimeout(closeForm, 2000);
-      } catch (err) {
-        statusDiv.textContent = "⚠️ Error sending data.";
-      }
-    }
-
-    function validatePhone(inputField) {
-      inputField.value = inputField.value.replace(/[^0-9+()\-\s]/g, "");
-    }
-
-    input.addEventListener("keypress", function (e) {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        sendMessage();
-      }
+<script>
+  const messages=document.getElementById('messages');
+  const userInput=document.getElementById('userInput');
+  const sendBtn=document.getElementById('sendBtn');
+  const scenarioButtons=document.querySelectorAll('.scenario-btn');
+  const leadOpen=document.getElementById('leadOpen');
+  const overlay=document.getElementById('overlay');
+  const leadClose=document.getElementById('leadClose');
+  const leadSubmit=document.getElementById('leadSubmit');
+  const leadStatus=document.getElementById('leadStatus');
+  let sessionId='sess_'+Date.now();
+  let currentScenario=null;
+  let messageCount=0;
+  function appendMessage(text,from='bot'){
+    const el=document.createElement('div');
+    el.className='msg '+(from==='user'?'user':'bot');
+    el.textContent=text;
+    el.style.alignSelf=(from==='user')?'flex-end':'flex-start';
+    messages.appendChild(el);
+    messages.scrollTop=messages.scrollHeight;
+  }
+  scenarioButtons.forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      scenarioButtons.forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      const scenario=btn.dataset.scenario;
+      currentScenario=scenario;
+      userInput.placeholder=(scenario==='buy')?'Search properties, e.g. 2-bed apartment':
+        (scenario==='rent')?'Specify area, bedrooms, timeline':'Tell us about the property you want to sell';
+      userInput.disabled=false;
+      sendBtn.disabled=true;
+      if(scenario==='buy') appendMessage("Hello! I'm Zizu — I can help you find apartments, villas and compounds to purchase. Where would you like to start?");
+      if(scenario==='rent') appendMessage("Hi! I'll help with rentals. Which area and how many bedrooms?");
+      if(scenario==='sell'){openLead();appendMessage("To sell — please leave contact details and a brief description in the form.");}
     });
-  </script>
+  });
+  userInput.addEventListener('input',()=>{sendBtn.disabled=!userInput.value.trim();});
+  sendBtn.addEventListener('click',sendMessage);
+  userInput.addEventListener('keypress',e=>{if(e.key==='Enter'){e.preventDefault();if(!sendBtn.disabled)sendMessage();}});
+  async function sendMessage(){
+    const text=userInput.value.trim();if(!text)return;
+    appendMessage(text,'user');userInput.value='';sendBtn.disabled=true;messageCount++;
+    if(messageCount%4===0)openLead();
+    try{
+      const res=await fetch('/chat',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({message:text,sessionId,scenario:currentScenario})});
+      if(!res.ok)throw new Error('server '+res.status);
+      const data=await res.json();
+      appendMessage(data.reply||'No reply from server.');
+      if(data.showContactForm)openLead();
+    }catch(err){console.warn('chat fetch failed:',err);
+      setTimeout(()=>appendMessage("Thanks — we'll review this and get back to you soon."),450);}
+  }
+  function openLead(){overlay.classList.add('visible');overlay.setAttribute('aria-hidden','false');setTimeout(()=>document.getElementById('leadName').focus(),120);}
+  function closeLead(){overlay.classList.remove('visible');overlay.setAttribute('aria-hidden','true');}
+  leadOpen.addEventListener('click',openLead);
+  leadClose.addEventListener('click',closeLead);
+  overlay.addEventListener('click',e=>{if(e.target===overlay)closeLead();});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeLead();});
+  leadSubmit.addEventListener('click',async()=>{
+    leadStatus.textContent='';
+    const name=document.getElementById('leadName').value.trim();
+    const email=document.getElementById('leadEmail').value.trim();
+    const phone=document.getElementById('leadPhone').value.trim();
+    const planning=document.getElementById('leadPlanning').value;
+    const desc=document.getElementById('leadDesc').value.trim();
+    const emailRe=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if(!name||!emailRe.test(email)||!phone){leadStatus.textContent='Please enter a valid name, email and phone.';return;}
+    leadStatus.textContent='Sending...';
+    try{
+      const res=await fetch('/lead',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({name,email,phone,planning,desc,sessionId,scenario:currentScenario})});
+      if(!res.ok)throw new Error('lead send failed '+res.status);
+      leadStatus.textContent='Thanks — we will contact you soon.';
+      setTimeout(()=>{leadStatus.textContent='';closeLead();},1200);
+    }catch(err){console.warn('lead send failed',err);leadStatus.textContent='Error sending lead — please try again later.';}
+  });
+  appendMessage('Welcome! Choose Buy / Rent / Sell to start.','bot');
+</script>
 </body>
 </html>
