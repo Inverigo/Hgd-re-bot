@@ -1,8 +1,6 @@
 {
   "name": "zizu-real-estate-bot",
   "version": "1.0.0",
-  "description": "Real estate assistant bot for Hurghada",
-  "main": "server.js",
   "type": "module",
   "scripts": {
     "start": "node server.js"
