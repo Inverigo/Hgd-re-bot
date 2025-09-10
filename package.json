@@ -1,20 +1,16 @@
 {
-  "name": "hgd-re-bot",
+  "name": "zizu-real-estate-bot",
   "version": "1.0.0",
-  "description": "Real estate chatbot for Hurghada",
+  "description": "Real estate assistant bot for Hurghada",
   "main": "server.js",
   "type": "module",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node server.js"
+    "start": "node server.js"
   },
   "dependencies": {
-    "express": "^4.18.2",
     "cors": "^2.8.5",
-    "openai": "^4.20.1",
-    "nodemailer": "^6.9.7"
-  },
-  "keywords": ["chatbot", "real-estate", "hurghada"],
-  "author": "Your Name",
-  "license": "MIT"
+    "express": "^4.18.2",
+    "nodemailer": "^6.9.4",
+    "openai": "^4.26.0"
+  }
 }
