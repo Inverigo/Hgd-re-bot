@@ -11,10 +11,10 @@
     .user { background: #007cba; color: white; text-align: right; }
     .bot { background: #e3f2fd; }
     .input-container { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
-    input, button { padding: 10px; border-radius: 5px; border: 1px solid #ccc; }
+    input, button, textarea, select { padding: 10px; border-radius: 5px; border: 1px solid #ccc; }
     button { background: #007cba; color: white; border: none; cursor: pointer; }
     .quick-buttons button { margin-right: 10px; margin-bottom: 10px; }
-    .contact-form input, .contact-form select { width: 100%; margin-bottom: 10px; }
+    .contact-form input, .contact-form textarea, .contact-form select { width: 100%; margin-bottom: 10px; }
   </style>
 </head>
 <body>
@@ -23,46 +23,73 @@
     <div id="messages"></div>
 
     <div class="quick-buttons">
-      <button onclick="sendQuick('Купить недвижимость')">🏠 Купить</button>
-      <button onclick="sendQuick('Арендовать недвижимость')">📦 Снять</button>
-      <button onclick="sendQuick('Продать недвижимость')">💼 Продать</button>
+      <button onclick="startBuy()">Buy</button>
+      <button onclick="startRent()">Rent</button>
+      <button onclick="startSell()">Sell</button>
     </div>
 
     <div class="input-container">
-      <input id="userInput" placeholder="Ваш вопрос..." />
-      <button onclick="sendMessage()">Send</button>
+      <input id="userInput" placeholder="Type your message..." disabled />
+      <button onclick="sendMessage()" disabled id="sendBtn">Send</button>
     </div>
 
     <div id="contactForm" class="contact-form" style="display:none;">
-      <h3>📋 Оставьте ваши контакты</h3>
-      <input id="leadName" placeholder="Имя" />
+      <h3>📋 Leave your contact details</h3>
+      <input id="leadName" placeholder="Your name" />
       <input id="leadEmail" placeholder="Email" />
-      <input id="leadPhone" placeholder="Телефон" />
+      <input id="leadPhone" placeholder="Phone number" />
       <select id="leadPlanning">
-        <option value="">Срок покупки/аренды</option>
-        <option value="Срочно">Срочно</option>
-        <option value="1–2 месяца">1–2 месяца</option>
-        <option value="3–5 месяцев">3–5 месяцев</option>
+        <option value="">Planning horizon</option>
+        <option value="Urgent">Urgent</option>
+        <option value="1–2 months">1–2 months</option>
+        <option value="3–5 months">3–5 months</option>
       </select>
-      <button onclick="submitLead()">Отправить</button>
+      <textarea id="leadDescription" placeholder="Brief description of the apartment and area"></textarea>
+      <button onclick="submitLead()">Submit</button>
     </div>
   </div>
 
   <script>
     const messagesDiv = document.getElementById("messages");
+    const input = document.getElementById("userInput");
+    const sendBtn = document.getElementById("sendBtn");
     const sessionId = "session_" + Date.now();
 
-    function sendQuick(text) {
-      document.getElementById("userInput").value = text;
-      sendMessage();
+    function addBotMessage(text) {
+      messagesDiv.innerHTML += `<div class="message bot">${text}</div>`;
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    function addUserMessage(text) {
+      messagesDiv.innerHTML += `<div class="message user">${text}</div>`;
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    function enableInput() {
+      input.disabled = false;
+      sendBtn.disabled = false;
+      input.focus();
+    }
+
+    function startBuy() {
+      addBotMessage("Hello! I'm Zizu, your real estate assistant in Hurghada. We have over 100 properties available for purchase — apartments, villas, and compounds. What are you looking for?");
+      enableInput();
+    }
+
+    function startRent() {
+      addBotMessage("Hi! I'm Zizu, your rental assistant in Hurghada. Let's find the perfect place for you. Could you tell me which area you're interested in, how many bedrooms you need, and your rental timeline?");
+      enableInput();
+    }
+
+    function startSell() {
+      document.getElementById("contactForm").style.display = "block";
+      addBotMessage("Great! To help you sell your property, please leave your contact details and a brief description of the apartment and its location.");
     }
 
     async function sendMessage() {
-      const input = document.getElementById("userInput");
       const message = input.value.trim();
       if (!message) return;
-
-      messagesDiv.innerHTML += `<div class="message user">${message}</div>`;
+      addUserMessage(message);
       input.value = "";
 
       const res = await fetch("/chat", {
@@ -72,17 +99,33 @@
       });
 
       const data = await res.json();
-      messagesDiv.innerHTML += `<div class="message bot">${data.reply}</div>`;
+      addBotMessage(data.reply);
 
       if (data.showContactForm) {
         document.getElementById("contactForm").style.display = "block";
       }
-
-      messagesDiv.scrollTop = messagesDiv.scrollHeight;
     }
 
     async function submitLead() {
       const name = document.getElementById("leadName").value;
       const email = document.getElementById("leadEmail").value;
       const phone = document.getElementById("leadPhone").value;
-      const planning = document.getElementBy
+      const planning = document.getElementById("leadPlanning").value;
+      const description = document.getElementById("leadDescription").value;
+
+      if (!name || !email || !phone) {
+        alert("Please fill in all required fields.");
+        return;
+      }
+
+      await fetch("/lead", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, phone, planning, description, sessionId })
+      });
+
+      document.getElementById("contactForm").innerHTML = "<strong>✅ Thank you! We'll contact you soon.</strong>";
+    }
+  </script>
+</body>
+</html>
