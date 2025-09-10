@@ -14,7 +14,6 @@
       max-width: 600px;
       margin: auto;
     }
-
     .chat-box {
       background: white;
       padding: 20px;
@@ -22,7 +21,6 @@
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
       position: relative;
     }
-
     .bot-title {
       font-size: 28px;
       text-align: center;
@@ -30,7 +28,6 @@
       font-weight: 600;
       margin-bottom: 20px;
     }
-
     .message {
       margin-bottom: 12px;
       padding: 12px;
@@ -38,23 +35,19 @@
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
       animation: fadeIn 0.3s ease-in-out;
     }
-
     .user {
       background: #004225;
       color: white;
       text-align: right;
     }
-
     .bot {
       background: #e3f2fd;
       color: #333;
     }
-
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
     }
-
     .quick-buttons {
       display: flex;
       justify-content: center;
@@ -62,7 +55,6 @@
       margin-bottom: 20px;
       flex-wrap: wrap;
     }
-
     .quick-buttons button {
       background-color: #004225;
       color: white;
@@ -73,32 +65,31 @@
       cursor: pointer;
       transition: background 0.3s ease;
     }
-
-    .quick-buttons button:hover {
+    .quick-buttons button:disabled {
+      opacity: 0.6;
+      cursor: default;
+    }
+    .quick-buttons button:hover:enabled {
       background-color: #006837;
     }
-
     .input-container {
       display: flex;
       flex-direction: column;
       gap: 10px;
       margin-top: 10px;
     }
-
     input, button, textarea, select {
       padding: 10px;
       border-radius: 6px;
       border: 1px solid #ccc;
       font-size: 16px;
     }
-
     button {
       background-color: #004225;
       color: white;
       border: none;
       cursor: pointer;
     }
-
     #contactOverlay {
       position: fixed;
       top: 0;
@@ -111,7 +102,6 @@
       align-items: center;
       z-index: 1000;
     }
-
     .contact-form {
       background: white;
       padding: 20px;
@@ -120,7 +110,6 @@
       max-width: 90%;
       position: relative;
     }
-
     .contact-form input,
     .contact-form select,
     .contact-form textarea {
@@ -132,7 +121,6 @@
       font-size: 16px;
       margin-bottom: 12px;
     }
-
     .contact-form button {
       width: 100%;
       padding: 12px;
@@ -143,11 +131,9 @@
       border: none;
       cursor: pointer;
     }
-
     .contact-form button:hover {
       background-color: #006837;
     }
-
     .close-btn {
       position: absolute;
       top: 10px;
@@ -158,13 +144,11 @@
       cursor: pointer;
       color: #666;
     }
-
     #submitStatus {
       text-align: center;
       margin-top: 10px;
       font-size: 16px;
     }
-
     @media (max-width: 600px) {
       .chat-box {
         padding: 10px;
@@ -178,18 +162,16 @@
 <body>
   <div class="chat-box">
     <h1 class="bot-title">🏠 Zizu Real Estate Assistant</h1>
-
-    <div id="messages"></div>
-
     <div class="quick-buttons">
       <button onclick="startBuy()">🏠 Buy</button>
       <button onclick="startRent()">📦 Rent</button>
       <button onclick="startSell()">💼 Sell</button>
     </div>
-
+    <div id="messages"></div>
     <div class="input-container">
-      <input id="userInput" placeholder="Type your message..." disabled />
+      <input id="userInput" placeholder="Please select an action above" disabled />
       <button onclick="sendMessage()" disabled id="sendBtn">Send</button>
+      <button onclick="openLeadForm()" id="leadBtn">📋 Leave Contact</button>
     </div>
   </div>
 
@@ -217,6 +199,7 @@
     const input = document.getElementById("userInput");
     const sendBtn = document.getElementById("sendBtn");
     const sessionId = "session_" + Date.now();
+    let messageCount = 0;
 
     function addBotMessage(text) {
       messagesDiv.innerHTML += `<div class="message bot">${text}</div>`;
@@ -231,7 +214,17 @@
     function enableInput() {
       input.disabled = false;
       sendBtn.disabled = false;
+      input.placeholder = "Type your message...";
       input.focus();
+      disableQuickButtons();
+    }
+
+    function disableQuickButtons() {
+      document.querySelectorAll(".quick-buttons button").forEach(btn => {
+        btn.disabled = true;
+        btn.style.opacity = "0.6";
+        btn.style.cursor = "default";
+      });
     }
 
     function startBuy() {
@@ -245,42 +238,14 @@
     }
 
     function startSell() {
-      document.getElementById("contactOverlay").style.display = "flex";
+      openLeadForm();
       addBotMessage("Great! To help you sell your property, please leave your contact details and a brief description of the apartment and its location.");
+      disableQuickButtons();
+    }
+
+    function openLeadForm() {
+      document.getElementById("contactOverlay").style.display = "flex";
     }
 
     function closeForm() {
-      document.getElementById("contactOverlay").style.display = "none";
-    }
-
-    async function sendMessage() {
-      const message = input.value.trim();
-      if (!message) return;
-      addUserMessage(message);
-      input.value = "";
-
-      const res = await fetch("/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message, sessionId })
-      });
-
-      const data = await res.json();
-      addBotMessage(data.reply);
-
-      if (data.showContactForm) {
-        document.getElementById("contactOverlay").style.display = "flex";
-      }
-    }
-
-        input.addEventListener("keypress", function (e) {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        sendMessage();
-      }
-    });
-
-    function validatePhone(input) {
-      input.value = input.value.replace(/[^0-9+()\-\s]/g, "");
-    }
-  </script>
+      document.getElementById("contactOverlay").
