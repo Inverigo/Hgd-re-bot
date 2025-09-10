@@ -20,6 +20,7 @@
       padding: 20px;
       border-radius: 12px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      position: relative;
     }
 
     .bot-title {
@@ -98,18 +99,70 @@
       cursor: pointer;
     }
 
-    .contact-form {
+    #contactOverlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0,0,0,0.5);
       display: none;
-      margin-top: 20px;
-      background: #fff;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .contact-form {
+      background: white;
       padding: 20px;
       border-radius: 12px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      max-width: 90%;
+      position: relative;
     }
 
-    .contact-form input, .contact-form textarea, .contact-form select {
+    .contact-form input,
+    .contact-form select,
+    .contact-form textarea {
       width: 100%;
-      margin-bottom: 10px;
+      box-sizing: border-box;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+      margin-bottom: 12px;
+    }
+
+    .contact-form button {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      border-radius: 6px;
+      background-color: #004225;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    .contact-form button:hover {
+      background-color: #006837;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: transparent;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      color: #666;
+    }
+
+    #submitStatus {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 16px;
     }
 
     @media (max-width: 600px) {
@@ -138,12 +191,15 @@
       <input id="userInput" placeholder="Type your message..." disabled />
       <button onclick="sendMessage()" disabled id="sendBtn">Send</button>
     </div>
+  </div>
 
-    <div id="contactForm" class="contact-form">
+  <div id="contactOverlay">
+    <div class="contact-form">
+      <button class="close-btn" onclick="closeForm()">✖</button>
       <h3>📋 Leave your contact details</h3>
       <input id="leadName" placeholder="Your name" />
       <input id="leadEmail" placeholder="Email" />
-      <input id="leadPhone" placeholder="Phone number" />
+      <input id="leadPhone" placeholder="Phone number" oninput="validatePhone(this)" />
       <select id="leadPlanning">
         <option value="">Planning horizon</option>
         <option value="Urgent">Urgent</option>
@@ -152,6 +208,7 @@
       </select>
       <textarea id="leadDescription" placeholder="Brief description of the apartment and area"></textarea>
       <button onclick="submitLead()">Submit</button>
+      <div id="submitStatus"></div>
     </div>
   </div>
 
@@ -188,8 +245,12 @@
     }
 
     function startSell() {
-      document.getElementById("contactForm").style.display = "block";
+      document.getElementById("contactOverlay").style.display = "flex";
       addBotMessage("Great! To help you sell your property, please leave your contact details and a brief description of the apartment and its location.");
+    }
+
+    function closeForm() {
+      document.getElementById("contactOverlay").style.display = "none";
     }
 
     async function sendMessage() {
@@ -208,30 +269,18 @@
       addBotMessage(data.reply);
 
       if (data.showContactForm) {
-        document.getElementById("contactForm").style.display = "block";
+        document.getElementById("contactOverlay").style.display = "flex";
       }
     }
 
-    async function submitLead() {
-      const name = document.getElementById("leadName").value;
-      const email = document.getElementById("leadEmail").value;
-      const phone = document.getElementById("leadPhone").value;
-      const planning = document.getElementById("leadPlanning").value;
-      const description = document.getElementById("leadDescription").value;
-
-      if (!name || !email || !phone) {
-        alert("Please fill in all required fields.");
-        return;
+        input.addEventListener("keypress", function (e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        sendMessage();
       }
+    });
 
-      await fetch("/lead", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, phone, planning, description, sessionId })
-      });
-
-      document.getElementById("contactForm").innerHTML = "<strong>✅ Thank you! We'll contact you soon.</strong>";
+    function validatePhone(input) {
+      input.value = input.value.replace(/[^0-9+()\-\s]/g, "");
     }
   </script>
-</body>
-</html>
