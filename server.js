@@ -28,25 +28,22 @@ const conversations = new Map();
 const leads = [];
 
 const SYSTEM_PROMPT = `
-You are Zizu, a multilingual real estate assistant for Hurghada, Egypt. You help clients buy or rent property and guide them through the process.
+You are Zizu, a multilingual real estate assistant for Hurghada, Egypt. You help clients buy, rent, or sell property and guide them through the process.
 
-Always reply in the user's language (English, Russian, Ukrainian, Arabic, German, French). Greet warmly and mention that you have over 100 properties available. Ask what they are looking for: buy, rent, or sell.
+Always reply in the user's language (English, Russian, Ukrainian, Arabic, German, French). Speak naturally and professionally. Never include technical metadata or JSON — just respond as Zizu.
 
-Ask key questions:
-- Property type (apartment, villa, compound)
-- Location
-- Budget
-- Number of bedrooms
-- Pool or beach access
-- Timeline (urgent, 1–2 months, 3–5 months)
+Scenarios:
+- If the user wants to buy: greet them, mention 100+ properties, ask about type, location, budget, bedrooms, pool/beach access, and timeline.
+- If the user wants to rent: greet them, ask about area, number of rooms, rental duration, and budget.
+- If the user wants to sell: ask for contact details and a brief description of the apartment and location.
 
-After 2–3 exchanges, ask for contact details:
+After 3–4 exchanges, if the user seems interested, ask for contact details:
 - Name
 - Phone
 - Email
 - Planning horizon
 
-Your response must be plain text only. Do not include JSON, metadata, or technical fields. Just speak as Zizu, naturally and professionally.
+Always be friendly, helpful, and focused on guiding the user toward a decision.
 `;
 
 app.post("/chat", async (req, res) => {
@@ -59,7 +56,7 @@ app.post("/chat", async (req, res) => {
     const history = conversations.get(sessionId) || [];
     const messages = [
       { role: "system", content: SYSTEM_PROMPT },
-      ...history.map(msg => ({ role: "user", content: msg.user })),
+      ...history.map(msg => ({ role: "user", content: msg.user }, { role: "assistant", content: msg.bot })),
       { role: "user", content: message }
     ];
 
@@ -87,7 +84,7 @@ app.post("/chat", async (req, res) => {
 
 app.post("/lead", async (req, res) => {
   try {
-    const { name, email, phone, planning, sessionId = "default" } = req.body;
+    const { name, email, phone, planning, description, sessionId = "default" } = req.body;
     if (!name || !email || !phone) {
       return res.status(400).json({ error: "Missing contact fields" });
     }
@@ -99,6 +96,7 @@ app.post("/lead", async (req, res) => {
       email,
       phone,
       planning,
+      description,
       conversation: conversations.get(sessionId) || []
     };
 
@@ -110,6 +108,7 @@ app.post("/lead", async (req, res) => {
       <p><strong>Email:</strong> ${email}</p>
       <p><strong>Phone:</strong> ${phone}</p>
       <p><strong>Planning:</strong> ${planning}</p>
+      <p><strong>Description:</strong> ${description}</p>
       <hr>
       <pre>${lead.conversation.map((msg, i) => `#${i + 1}\nUser: ${msg.user}\nZizu: ${msg.bot}`).join("\n\n")}</pre>
     `;
