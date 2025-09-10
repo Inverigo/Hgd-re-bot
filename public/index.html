@@ -193,7 +193,6 @@
       <div id="submitStatus"></div>
     </div>
   </div>
-
   <script>
     const messagesDiv = document.getElementById("messages");
     const input = document.getElementById("userInput");
@@ -248,4 +247,79 @@
     }
 
     function closeForm() {
-      document.getElementById("contactOverlay").
+      document.getElementById("contactOverlay").style.display = "none";
+    }
+
+    async function sendMessage() {
+      const message = input.value.trim();
+      if (!message) return;
+      addUserMessage(message);
+      input.value = "";
+      messageCount++;
+
+      // Показ формы после каждого 4-го сообщения
+      if (messageCount % 4 === 0) {
+        openLeadForm();
+      }
+
+      try {
+        const res = await fetch("/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message, sessionId })
+        });
+
+        const data = await res.json();
+        addBotMessage(data.reply || "No reply from server");
+
+        if (data.showContactForm) {
+          openLeadForm();
+        }
+      } catch (err) {
+        addBotMessage("⚠️ Error connecting to server.");
+      }
+    }
+
+    async function submitLead() {
+      const name = document.getElementById("leadName").value.trim();
+      const email = document.getElementById("leadEmail").value.trim();
+      const phone = document.getElementById("leadPhone").value.trim();
+      const planning = document.getElementById("leadPlanning").value;
+      const description = document.getElementById("leadDescription").value.trim();
+      const statusDiv = document.getElementById("submitStatus");
+
+      if (!name || !email || !phone) {
+        alert("Please fill in all required fields.");
+        return;
+      }
+
+      statusDiv.textContent = "🔄 Sending...";
+
+      try {
+        await fetch("/lead", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, email, phone, planning, description, sessionId })
+        });
+
+        statusDiv.textContent = "✅ Thank you! We'll contact you soon.";
+        setTimeout(closeForm, 2000);
+      } catch (err) {
+        statusDiv.textContent = "⚠️ Error sending data.";
+      }
+    }
+
+    function validatePhone(inputField) {
+      inputField.value = inputField.value.replace(/[^0-9+()\-\s]/g, "");
+    }
+
+    // Отправка по Enter
+    input.addEventListener("keypress", function (e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+  </script>
+</body>
+</html>
