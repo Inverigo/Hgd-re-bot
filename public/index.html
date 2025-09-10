@@ -1,38 +1,88 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Zizu Bot</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Zizu - Real Estate Assistant</title>
   <style>
-    body { font-family: Arial; padding: 20px; max-width: 600px; margin: auto; }
+    body { font-family: Arial; padding: 20px; max-width: 600px; margin: auto; background: #f5f5f5; }
+    .chat-box { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px #ccc; }
     .message { margin-bottom: 10px; padding: 10px; border-radius: 8px; }
     .user { background: #007cba; color: white; text-align: right; }
     .bot { background: #e3f2fd; }
+    .input-container { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+    input, button { padding: 10px; border-radius: 5px; border: 1px solid #ccc; }
+    button { background: #007cba; color: white; border: none; cursor: pointer; }
+    .quick-buttons button { margin-right: 10px; margin-bottom: 10px; }
+    .contact-form input, .contact-form select { width: 100%; margin-bottom: 10px; }
   </style>
 </head>
 <body>
-  <h2>🏠 Zizu - Real Estate Assistant</h2>
-  <div id="chat"></div>
-  <input id="input" placeholder="Type your message..." style="width:100%; padding:10px;" />
+  <div class="chat-box">
+    <h2>🏠 Zizu - Real Estate Assistant</h2>
+    <div id="messages"></div>
+
+    <div class="quick-buttons">
+      <button onclick="sendQuick('Купить недвижимость')">🏠 Купить</button>
+      <button onclick="sendQuick('Арендовать недвижимость')">📦 Снять</button>
+      <button onclick="sendQuick('Продать недвижимость')">💼 Продать</button>
+    </div>
+
+    <div class="input-container">
+      <input id="userInput" placeholder="Ваш вопрос..." />
+      <button onclick="sendMessage()">Send</button>
+    </div>
+
+    <div id="contactForm" class="contact-form" style="display:none;">
+      <h3>📋 Оставьте ваши контакты</h3>
+      <input id="leadName" placeholder="Имя" />
+      <input id="leadEmail" placeholder="Email" />
+      <input id="leadPhone" placeholder="Телефон" />
+      <select id="leadPlanning">
+        <option value="">Срок покупки/аренды</option>
+        <option value="Срочно">Срочно</option>
+        <option value="1–2 месяца">1–2 месяца</option>
+        <option value="3–5 месяцев">3–5 месяцев</option>
+      </select>
+      <button onclick="submitLead()">Отправить</button>
+    </div>
+  </div>
+
   <script>
-    const chat = document.getElementById('chat');
-    const input = document.getElementById('input');
-    input.addEventListener('keypress', async (e) => {
-      if (e.key === 'Enter') {
-        const msg = input.value;
-        input.value = '';
-        chat.innerHTML += `<div class="message user">${msg}</div>`;
-        const res = await fetch('/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: msg, sessionId: 'web' })
-        });
-        const data = await res.json();
-        chat.innerHTML += `<div class="message bot">${JSON.stringify(data)}</div>`;
-        chat.scrollTop = chat.scrollHeight;
+    const messagesDiv = document.getElementById("messages");
+    const sessionId = "session_" + Date.now();
+
+    function sendQuick(text) {
+      document.getElementById("userInput").value = text;
+      sendMessage();
+    }
+
+    async function sendMessage() {
+      const input = document.getElementById("userInput");
+      const message = input.value.trim();
+      if (!message) return;
+
+      messagesDiv.innerHTML += `<div class="message user">${message}</div>`;
+      input.value = "";
+
+      const res = await fetch("/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message, sessionId })
+      });
+
+      const data = await res.json();
+      messagesDiv.innerHTML += `<div class="message bot">${data.reply}</div>`;
+
+      if (data.showContactForm) {
+        document.getElementById("contactForm").style.display = "block";
       }
-    });
-  </script>
-</body>
-</html>
+
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    async function submitLead() {
+      const name = document.getElementById("leadName").value;
+      const email = document.getElementById("leadEmail").value;
+      const phone = document.getElementById("leadPhone").value;
+      const planning = document.getElementBy
