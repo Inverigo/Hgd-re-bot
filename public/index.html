@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Zizu Bot</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: Arial; padding: 20px; max-width: 600px; margin: auto; }
+    .message { margin-bottom: 10px; padding: 10px; border-radius: 8px; }
+    .user { background: #007cba; color: white; text-align: right; }
+    .bot { background: #e3f2fd; }
+  </style>
+</head>
+<body>
+  <h2>🏠 Zizu - Real Estate Assistant</h2>
+  <div id="chat"></div>
+  <input id="input" placeholder="Type your message..." style="width:100%; padding:10px;" />
+  <script>
+    const chat = document.getElementById('chat');
+    const input = document.getElementById('input');
+    input.addEventListener('keypress', async (e) => {
+      if (e.key === 'Enter') {
+        const msg = input.value;
+        input.value = '';
+        chat.innerHTML += `<div class="message user">${msg}</div>`;
+        const res = await fetch('/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: msg, sessionId: 'web' })
+        });
+        const data = await res.json();
+        chat.innerHTML += `<div class="message bot">${JSON.stringify(data)}</div>`;
+        chat.scrollTop = chat.scrollHeight;
+      }
+    });
+  </script>
+</body>
+</html>
