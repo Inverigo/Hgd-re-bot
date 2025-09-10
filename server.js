@@ -38,22 +38,13 @@ app.get("/", (req, res) => {
         .contact-form { background: #e8f5e8; padding: 15px; border-radius: 10px; margin: 10px 0; }
         .contact-form input { width: 100%; padding: 8px; margin: 5px 0; border: 1px solid #ddd; border-radius: 5px; }
         .contact-form button { background: #4caf50; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
-        .language-switch { text-align: center; margin-bottom: 15px; }
-        .language-switch button { background: #f0f0f0; border: 1px solid #ddd; padding: 5px 10px; margin: 0 5px; border-radius: 5px; cursor: pointer; }
-        .language-switch button.active { background: #007cba; color: white; }
     </style>
 </head>
 <body>
     <div class="chat-container">
         <div class="header">
-            <h2>🏠 Zizu - Real Estate Assistant</h2>
+            <h2>�� Zizu - Real Estate Assistant</h2>
             <p>Your personal guide for buying and renting property in Hurghada, Egypt</p>
-        </div>
-        
-        <div class="language-switch">
-            <button onclick="switchLanguage('en')" class="active" id="btn-en">English</button>
-            <button onclick="switchLanguage('ru')" id="btn-ru">Русский</button>
-            <button onclick="switchLanguage('ar')" id="btn-ar">العربية</button>
         </div>
         
         <div id="messages" class="messages">
@@ -70,26 +61,6 @@ app.get("/", (req, res) => {
 
     <script>
         let sessionId = 'session_' + Date.now();
-        let currentLanguage = 'en';
-        
-        function switchLanguage(lang) {
-            currentLanguage = lang;
-            
-            // Update button styles
-            document.querySelectorAll('.language-switch button').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            document.getElementById('btn-' + lang).classList.add('active');
-            
-            // Update placeholder text
-            const input = document.getElementById('userInput');
-            const placeholders = {
-                'en': 'For example: I\'m looking for a 2-bedroom apartment near the beach...',
-                'ru': 'Например: Ищу двухкомнатную квартиру у моря...',
-                'ar': 'مثال: أبحث عن شقة بغرفتين قرب الشاطئ...'
-            };
-            input.placeholder = placeholders[lang];
-        }
         
         async function sendMessage() {
             const input = document.getElementById('userInput');
@@ -123,8 +94,7 @@ app.get("/", (req, res) => {
                     body: JSON.stringify({ 
                         message: message, 
                         task: 'consult',
-                        sessionId: sessionId,
-                        language: currentLanguage
+                        sessionId: sessionId
                     })
                 });
                 
@@ -304,7 +274,7 @@ function saveConversation(sessionId, message, response) {
 
 app.post("/chat", async (req, res) => {
   try {
-    const { message, task = "consult", sessionId, language = "en" } = req.body || {};
+    const { message, task = "consult", sessionId } = req.body || {};
     if (typeof message !== "string" || !message.trim()) {
       return res.status(400).json({ error: "bad_request", details: "message is required" });
     }
@@ -315,7 +285,7 @@ app.post("/chat", async (req, res) => {
       response_format: { type: "json_object" },
       messages: [
         { role: "system", content: SYSTEM_PROMPT },
-        { role: "user", content: `task=${task}\nlanguage=${language}\n${message}` }
+        { role: "user", content: `task=${task}\n${message}` }
       ]
     });
 
