@@ -11,14 +11,16 @@
       font-family: 'Poppins', sans-serif;
       margin: 0;
       padding: 20px;
-      max-width: 600px;
-      margin: auto;
+      display: flex;
+      justify-content: center;
     }
     .chat-box {
       background: white;
       padding: 20px;
       border-radius: 12px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      max-width: 600px;
+      width: 100%;
       position: relative;
     }
     .bot-title {
@@ -34,6 +36,7 @@
       border-radius: 12px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
       animation: fadeIn 0.3s ease-in-out;
+      word-wrap: break-word;
     }
     .user {
       background: #004225;
@@ -51,11 +54,13 @@
     .quick-buttons {
       display: flex;
       justify-content: center;
-      gap: 15px;
+      gap: 10px;
       margin-bottom: 20px;
       flex-wrap: wrap;
     }
     .quick-buttons button {
+      flex: 1 1 auto;
+      min-width: 100px;
       background-color: #004225;
       color: white;
       border: none;
@@ -83,12 +88,17 @@
       border-radius: 6px;
       border: 1px solid #ccc;
       font-size: 16px;
+      font-family: 'Poppins', sans-serif;
     }
     button {
       background-color: #004225;
       color: white;
       border: none;
       cursor: pointer;
+    }
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
     }
     #contactOverlay {
       position: fixed;
@@ -108,7 +118,9 @@
       border-radius: 12px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.2);
       max-width: 90%;
+      width: 400px;
       position: relative;
+      font-family: 'Poppins', sans-serif;
     }
     .contact-form input,
     .contact-form select,
@@ -120,6 +132,7 @@
       border: 1px solid #ccc;
       font-size: 16px;
       margin-bottom: 12px;
+      font-family: 'Poppins', sans-serif;
     }
     .contact-form button {
       width: 100%;
@@ -138,11 +151,21 @@
       position: absolute;
       top: 10px;
       right: 10px;
-      background: transparent;
+      background: #eee;
       border: none;
-      font-size: 20px;
+      font-size: 18px;
       cursor: pointer;
-      color: #666;
+      color: #333;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.3s;
+    }
+    .close-btn:hover {
+      background: #ccc;
     }
     #submitStatus {
       text-align: center;
@@ -180,7 +203,7 @@
       <button class="close-btn" onclick="closeForm()">✖</button>
       <h3>📋 Leave your contact details</h3>
       <input id="leadName" placeholder="Your name" />
-      <input id="leadEmail" placeholder="Email" />
+      <input id="leadEmail" placeholder="Email" type="email" />
       <input id="leadPhone" placeholder="Phone number" oninput="validatePhone(this)" />
       <select id="leadPlanning">
         <option value="">Planning horizon</option>
@@ -200,19 +223,29 @@
     const sessionId = "session_" + Date.now();
     let messageCount = 0;
 
+    function escapeHTML(str) {
+      return str.replace(/[&<>"']/g, tag => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+      }[tag]));
+    }
+
     function addBotMessage(text) {
-      messagesDiv.innerHTML += `<div class="message bot">${text}</div>`;
-      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+      messagesDiv.insertAdjacentHTML("beforeend", `<div class="message bot">${escapeHTML(text)}</div>`);
+      messagesDiv.scrollTo({ top: messagesDiv.scrollHeight, behavior: "smooth" });
     }
 
     function addUserMessage(text) {
-      messagesDiv.innerHTML += `<div class="message user">${text}</div>`;
-      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+      messagesDiv.insertAdjacentHTML("beforeend", `<div class="message user">${escapeHTML(text)}</div>`);
+      messagesDiv.scrollTo({ top: messagesDiv.scrollHeight, behavior: "smooth" });
     }
 
     function enableInput() {
       input.disabled = false;
-      sendBtn.disabled = false;
+      sendBtn.disabled = true;
       input.placeholder = "Type your message...";
       input.focus();
       disableQuickButtons();
@@ -221,8 +254,6 @@
     function disableQuickButtons() {
       document.querySelectorAll(".quick-buttons button").forEach(btn => {
         btn.disabled = true;
-        btn.style.opacity = "0.6";
-        btn.style.cursor = "default";
       });
     }
 
@@ -255,9 +286,9 @@
       if (!message) return;
       addUserMessage(message);
       input.value = "";
+      sendBtn.disabled = true;
       messageCount++;
 
-      // Показ формы после каждого 4-го сообщения
       if (messageCount % 4 === 0) {
         openLeadForm();
       }
@@ -268,6 +299,8 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ message, sessionId })
         });
+
+        if (!res.ok) throw new Error("Server error");
 
         const data = await res.json();
         addBotMessage(data.reply || "No reply from server");
@@ -293,14 +326,21 @@
         return;
       }
 
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        alert("Please enter a valid email.");
+        return;
+      }
+
       statusDiv.textContent = "🔄 Sending...";
 
       try {
-        await fetch("/lead", {
+        const res = await fetch("/lead", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ name, email, phone, planning, description, sessionId })
         });
+
+        if (!res.ok) throw new Error("Lead submission failed");
 
         statusDiv.textContent = "✅ Thank you! We'll contact you soon.";
         setTimeout(closeForm, 2000);
@@ -313,7 +353,10 @@
       inputField.value = inputField.value.replace(/[^0-9+()\-\s]/g, "");
     }
 
-    // Отправка по Enter
+    input.addEventListener("input", function () {
+      sendBtn.disabled = !input.value.trim();
+    });
+
     input.addEventListener("keypress", function (e) {
       if (e.key === "Enter") {
         e.preventDefault();
