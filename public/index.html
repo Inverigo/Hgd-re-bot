@@ -74,12 +74,94 @@
   textarea{min-height:96px;resize:vertical;}
   .lead-submit{margin-top:8px;display:block;width:100%;padding:12px;font-size:15px;border-radius:8px;border:0;background:var(--brand);color:#fff;cursor:pointer;}
   .status{margin-top:8px;font-size:14px;color:var(--muted);text-align:center;}
+  
+  /* Мобильные стили */
   @media (max-width:640px){
-    .lead-card{padding:16px;}
-    .lead-grid{grid-template-columns:1fr;}
-    .chat-box{height:calc(100vh - 48px);}
-    .input-row{flex-direction:column;align-items:stretch;}
-    .input-row .small{width:100%;}
+    .page {
+      margin: 0;
+      padding: 8px;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .chat-box {
+      height: 100%;
+      padding: 12px;
+      border-radius: 0;
+      box-shadow: none;
+    }
+    
+    .lead-card {
+      padding: 16px;
+      max-width: 95%;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    
+    .lead-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .input-row {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    
+    .input-row .small {
+      width: 100%;
+    }
+    
+    /* Адаптация к клавиатуре */
+    .input-area {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--card);
+      padding: 12px;
+      border-top: 1px solid #e0e0e0;
+      margin: 0;
+    }
+    
+    .messages {
+      padding-bottom: 80px; /* Место для input-area */
+    }
+    
+    /* Для модального окна на мобильных */
+    #overlay {
+      align-items: flex-start;
+      padding-top: 20px;
+      padding-bottom: 20px;
+    }
+    
+    .lead-card {
+      margin: auto;
+      max-height: calc(100vh - 40px);
+      overflow-y: auto;
+    }
+  }
+  
+  /* Дополнительные стили для очень маленьких экранов */
+  @media (max-width: 480px) {
+    .header {
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    .title {
+      font-size: 20px;
+    }
+    
+    .scenarios {
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    
+    .scenarios button {
+      min-width: 90px;
+      font-size: 14px;
+    }
   }
 </style>
 </head>
@@ -164,6 +246,7 @@
   let sessionId = 'sess_' + Date.now();
   let currentScenario = null;
   let messageCount = 0;
+  let isMobile = window.innerWidth <= 640;
 
   // Append message helper
   function appendMessage(text, from = 'bot'){
@@ -298,6 +381,43 @@
   document.getElementById('leadPhone').addEventListener('input', (e) => {
     e.target.value = e.target.value.replace(/[^0-9+()\- \s]/g, '');
   });
+
+  // Мобильные оптимизации
+  function handleMobileKeyboard() {
+    if (!isMobile) return;
+    
+    // Обработка появления/скрытия клавиатуры
+    const initialViewportHeight = window.innerHeight;
+    let currentViewportHeight = initialViewportHeight;
+    
+    function handleResize() {
+      currentViewportHeight = window.innerHeight;
+      const heightDifference = initialViewportHeight - currentViewportHeight;
+      
+      // Если клавиатура открыта (высота уменьшилась)
+      if (heightDifference > 150) {
+        document.body.classList.add('keyboard-open');
+        // Прокручиваем к последнему сообщению
+        setTimeout(() => {
+          messages.scrollTop = messages.scrollHeight;
+        }, 100);
+      } else {
+        document.body.classList.remove('keyboard-open');
+      }
+    }
+    
+    window.addEventListener('resize', handleResize);
+    
+    // Предотвращаем скрытие клавиатуры при отправке
+    userInput.addEventListener('blur', (e) => {
+      if (isMobile && userInput.value.trim()) {
+        setTimeout(() => userInput.focus(), 100);
+      }
+    });
+  }
+
+  // Инициализация мобильных функций
+  handleMobileKeyboard();
 
   // initial hint
   appendMessage('Welcome! Choose Buy / Rent / Sell to start.', 'bot');
