@@ -47,7 +47,7 @@
   .msg{max-width:78%;padding:10px 12px;border-radius:10px;margin-bottom:10px;line-height:1.35;}
   .msg.bot{background:#eef9f6;color:#05332b;align-self:flex-start;}
   .msg.user{background:var(--brand);color:#fff;align-self:flex-end;text-align:right;}
-  .input-area{margin-top:12px;position:sticky;bottom:0;padding-top:12px;z-index:2;background:transparent;}
+  .input-area{margin-top:12px;position:sticky;bottom:0;padding-top:12px;z-index:1;background:transparent;}
   .input-row{display:flex;gap:10px;align-items:center;}
   .input-row input[type="text"]{
     flex:1;padding:12px 14px;border-radius:10px;border:1px solid #e0e0e0;font-size:15px;box-sizing:border-box;}
@@ -56,12 +56,12 @@
   .input-row .btn.small{padding:10px 12px;}
   /* overlay always present (no display toggling) */
   #overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
-    background:rgba(10,10,10,0.45);opacity:0;pointer-events:none;transition:opacity .22s ease;}
+    background:rgba(10,10,10,0.45);opacity:0;pointer-events:none;transition:opacity .22s ease;z-index:1000;}
   #overlay.visible{opacity:1;pointer-events:auto;}
   .lead-card{
     width:520px;max-width:92%;background:var(--card);
     border-radius:12px;padding:20px;box-shadow:0 20px 60px rgba(0,0,0,0.18);
-    transform:translateY(-10px);opacity:0;transition:transform .2s ease,opacity .2s;position:relative;}
+    transform:translateY(-10px);opacity:0;transition:transform .2s ease,opacity .2s;position:relative;z-index:1001;}
   #overlay.visible .lead-card{transform:translateY(0);opacity:1;}
   .lead-title{margin:0 0 12px;font-size:18px;color:var(--brand);font-weight:600;}
   .close-btn{all:unset;position:absolute;top:12px;right:12px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:50%;cursor:pointer;}
@@ -115,7 +115,7 @@
           <button id="sendBtn" class="btn small" disabled>Send</button>
         </div>
         <div style="margin-top:8px; display:flex; gap:10px;">
-          <button id="leadOpen" class="btn ghost">📋 Leave Contact</button>
+          <button id="leadOpen" class="btn ghost">�� Leave Contact</button>
         </div>
       </div>
     </div>
